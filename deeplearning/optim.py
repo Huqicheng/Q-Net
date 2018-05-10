@@ -15,6 +15,10 @@ class SGD(Optimizer):
         self.lr = lr
     
     def step(self, net: NeuralNet) -> None:
+        """
+            vi = alpha * grad
+            w = w - vi
+        """
         for name, param, grad in net.params_and_grads():
             param -= self.lr * grad
 
@@ -32,6 +36,10 @@ class Momentum_SGD(Optimizer):
             return 0
 
     def step(self, net: NeuralNet) -> None:
+        """
+            vi = gamma * vi-1 + alpha * grad
+            w = w - vi
+        """
         for name, param, grad in net.params_and_grads():
-            self.velocity[name] = self.gamma*self.get_velocity(name)+self.lr*grad
-            param -= self.lr * grad
+            self.velocity[name] = self.gamma * self.get_velocity(name) + self.lr * grad
+            param -= self.velocity[name]
