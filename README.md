@@ -23,6 +23,7 @@ A simplified deep learning framework.<br>
 ## 4. Examples
 
 #### 4.1 xor
+The source code of training a Neural Network to fit the xor function is in xor.py.
 #### 4.1.1 Building a Neural Network with one hidden layer and one softmax layer.
 net = NeuralNet([<br>
                  Dense(input_size=2, output_size=20),<br>
