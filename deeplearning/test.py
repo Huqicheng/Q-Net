@@ -2,12 +2,12 @@ from deeplearning.tensor import Tensor
 import numpy as np
 
 
-from deeplearning.layers import Dropout
+from deeplearning.layers import BatchNormalization
 
-layer = Dropout()
+layer = BatchNormalization(name='bn',input_size=4)
 
 
-input = np.array([[1,2,3,4],[2,3,4,5]])
+input = np.array([[1,1,3,3],[1,1,11,11]])
 
 
 print(layer.forward(input,training=True))

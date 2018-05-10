@@ -83,17 +83,30 @@ class BatchNormalization(Layer):
     """
         references:
         https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html
+        https://www.quora.com/How-does-batch-normalization-behave-differently-at-training-time-and-test-time
     """
     def __init__(self,
                  name,
-                 input_size: int) -> None:
+                 input_size: int,
+                 decay: float = 0.99) -> None:
         super().__init__(name)
         self.params['gamma'] = np.ones((input_size,))
-        self.params['beta'] = np.ones((input_size, ))
+        self.params['beta'] = np.zeros((input_size,))
+        self.global_mean = np.zeros((input_size,))
+        self.global_var = np.zeros((input_size,))
+        self.decay = decay
         self.input_size = input_size
         self.eps = np.finfo(float).eps
 
     def forward(self, inputs: Tensor, **kwargs) -> Tensor:
+        training = kwargs["training"]
+        
+        if training == False:
+            x_hat = (inputs - self.global_mean) / np.sqrt(self.global_var + self.eps)
+            gammax = self.params['gamma'] * x_hat
+            self.out = gammax + self.params['beta']
+            return self.out
+        
         N,D = inputs.shape
         mu = 1./N * np.sum(inputs,axis=0)
         self.xmu = inputs - mu
@@ -104,6 +117,9 @@ class BatchNormalization(Layer):
         self.xhat = self.xmu * self.ivar
         gammax = self.params['gamma'] * self.xhat
         self.out = gammax + self.params['beta']
+        
+        self.global_mean = self.global_mean * self.decay + mu * (1 - self.decay)
+        self.global_var = self.global_var * self.decay + self.var * (1 - self.decay)
         
         return self.out
 
