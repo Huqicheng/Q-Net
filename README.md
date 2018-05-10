@@ -41,9 +41,9 @@ train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
 ```
 
 ## References
-[Softmax Function] https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0 <br>
-[Differentiation of Cross Entropy with Softmax Function] https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy <br>
-[Introduction of Dropout] https://blog.csdn.net/u010089444/article/details/76725843 <br>
-[Implementation of Dropout] https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/ <br>
+[Softmax Function](https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0)
+[Differentiation of Cross Entropy with Softmax Function](https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy)
+[Introduction of Dropout](https://blog.csdn.net/u010089444/article/details/76725843)
+[Implementation of Dropout](https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/)
 
 
