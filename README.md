@@ -32,7 +32,7 @@ The source code of training a Neural Network to fit the xor function is in xor.p
 >> Dense(input_size=20, output_size=2),<br>
 >> Dropout(0.5),<br>
 >> Softmax()<br>
-    ])<br>
+> ])<br>
 #### 4.1.2 Training the Neural Network
 train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
 
