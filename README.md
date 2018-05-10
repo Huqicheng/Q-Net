@@ -45,9 +45,11 @@ train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 ## References
 * [Softmax Function](https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0)
 * [Differentiation of Cross Entropy with Softmax Function](https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy)
-* [Introduction of Dropout](https://blog.csdn.net/u010089444/article/details/76725843)
-* [Implementation of Dropout](https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/)
-* [Implementation of forward and backward of BN](https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html)
-* [Difference between training and testing of BN Layer](https://www.quora.com/How-does-batch-normalization-behave-differently-at-training-time-and-test-time)
+* [Introduction of Dropout](https://blog.csdn.net/stdcoutzyx/article/details/49022443)
+* [Implementation of Dropout](https://blog.csdn.net/hjimce/article/details/50413257)
+* [Introduction of Different Optimizers](https://blog.csdn.net/u010089444/article/details/76725843)
+* [Implementation of Different Optimizers](https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/)
+* [Implementation of Forward and Backward of BN](https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html)
+* [Difference between Training and Testing of BN Layer](https://www.quora.com/How-does-batch-normalization-behave-differently-at-training-time-and-test-time)
 
 
