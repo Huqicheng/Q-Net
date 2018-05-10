@@ -27,12 +27,12 @@ A simplified deep learning framework.<br>
 The source code of training a Neural Network to fit the xor function is in xor.py.
 #### 4.1.1 Building a Neural Network with one hidden layer and one softmax layer.
 net = NeuralNet([<br>
-                 Dense(input_size=2, output_size=20),<br>
-                 Sigmoid(),<br>
-                 Dense(input_size=20, output_size=2),<br>
-                 Dropout(0.5),<br>
-                 Softmax()<br>
-                 ])<br>
+      Dense(input_size=2, output_size=20),<br>
+      Sigmoid(),<br>
+      Dense(input_size=20, output_size=2),<br>
+      Dropout(0.5),<br>
+      Softmax()<br>
+    ])<br>
 #### 4.1.2 Training the Neural Network
 train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
 
