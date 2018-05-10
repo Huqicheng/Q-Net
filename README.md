@@ -29,7 +29,7 @@ The source code of training a Neural Network to fit the xor function is in xor.p
 net = NeuralNet([<br>
                  Dense(input_size=2, output_size=20),<br>
                  Sigmoid(),<br>
-                 Dense(input_size=20, output_size=3),<br>
+                 Dense(input_size=20, output_size=2),<br>
                  Dropout(0.5),<br>
                  Softmax()<br>
                  ])<br>
