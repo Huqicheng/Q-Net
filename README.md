@@ -6,10 +6,10 @@ A simplified deep learning framework.<br>
 * Dense<br>
 * Dropout<br>
 * Activations<br>
->> Sigmoid
->> Tanh
->> Softmax
->> ReLU
+  * Sigmoid
+  * Tanh
+  * Softmax
+  * ReLU
 
   
 
