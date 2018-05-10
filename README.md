@@ -21,6 +21,9 @@ A simplified deep learning framework.<br>
 ## 3. Optimizers
 * SGD 
 * Momemtum_SGD 
+* AdaGrad
+* RMSProp
+* Adam
 
 ## 4. Examples
 
