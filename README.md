@@ -2,7 +2,7 @@ DeepLearningFramework
 =====
 A simplified deep learning framework.<br>
 
-## 1. Implemented Layers
+## 1. Layers
 * Dense<br>
 * Dropout<br>
 * Activations<br>
@@ -13,14 +13,17 @@ A simplified deep learning framework.<br>
 
   
 
-## 2. Implemented Loss Functions
+## 2. Loss Functions
 * MSE<br>
 * CrossEntropy<br>
 
-## 3. Examples
+## 3. Optimizers
+* SGD <br>
 
-### 3.1 xor
-#### 3.1.1 Building a Neural Network with one hidden layer and one softmax layer.
+## 4. Examples
+
+#### 4.1 xor
+#### 4.1.1 Building a Neural Network with one hidden layer and one softmax layer.
 net = NeuralNet([<br>
                  Dense(input_size=2, output_size=20),<br>
                  Sigmoid(),<br>
@@ -28,7 +31,7 @@ net = NeuralNet([<br>
                  Dropout(0.5),<br>
                  Softmax()<br>
                  ])<br>
-#### 3.1.2 Training the Neural Network
+#### 4.1.2 Training the Neural Network
 train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
 
 
