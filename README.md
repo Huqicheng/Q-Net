@@ -27,21 +27,23 @@ A simplified deep learning framework.<br>
 The source code of training a Neural Network to fit the xor function is in xor.py.
 #### 4.1.1 Building a Neural Network with one hidden layer and one softmax layer.
 ```
-net = NeuralNet([<br>
-    Dense(input_size=2, output_size=20),<br>
-    Sigmoid(),<br>
-    Dense(input_size=20, output_size=2),<br>
-    Dropout(0.5),<br>
-    Softmax()<br>
+net = NeuralNet([
+    Dense(input_size=2, output_size=20),
+    Sigmoid(),
+    Dense(input_size=20, output_size=2),
+    Dropout(0.5),
+    Softmax()
  ])<br>
 ```
 #### 4.1.2 Training the Neural Network
+```
 train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
+```
 
 ## References
-https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0 <br>
-https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy <br>
-https://blog.csdn.net/u010089444/article/details/76725843 <br>
-https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/ <br>
+[Softmax Function]https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0 <br>
+[Differentiation of Cross Entropy with Softmax Function]https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy <br>
+[Introduction of Dropout]https://blog.csdn.net/u010089444/article/details/76725843 <br>
+[Implementation of Dropout]https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/ <br>
 
 
