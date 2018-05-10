@@ -6,4 +6,14 @@ A simplified deep learning framework.<br>
 * Dense<br>
 * Dropout<br>
 * Activations<br>
+>> Sigmoid
+>> Tanh
+>> Softmax
+>> ReLU
+
+  
+
+## Implemented Loss Functions
+* MSE<br>
+* CrossEntropy<br>
 
