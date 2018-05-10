@@ -3,9 +3,9 @@ import numpy as np
 from deeplearning.train import train
 from deeplearning.nn import NeuralNet
 from deeplearning.activation import Tanh,Softmax,Sigmoid,ReLU
-from deeplearning.layers import Dense,Dropout
+from deeplearning.layers import Dense,Dropout,BatchNormalization
 from deeplearning.loss import CrossEntropy
-from deeplearning.optim import Momentum_SGD
+from deeplearning.optim import Momentum_SGD,SGD
 
 inputs = np.array([
                    [0, 0],
@@ -15,28 +15,29 @@ inputs = np.array([
                    ])
 
 targets = np.array([
-                    [1, 0, 0],
-                    [0, 1, 0],
-                    [0, 1, 0],
-                    [0, 0, 1]
+                    [1, 0],
+                    [0, 1],
+                    [0, 1],
+                    [1, 0]
                     ])
 
 net = NeuralNet([
                  Dense(input_size=2, output_size=20, name="dense_1"),
                  Sigmoid(name="sigmoid_1"),
-                 Dense(input_size=20, output_size=3,name="dense_2"),
-                 Dropout(dropout_rate=0.5,name="dropout_1"),
+                 Dense(input_size=20, output_size=2,name="dense_2"),
+                 BatchNormalization(name="bn_1",input_size=2),
                  Softmax(name="softmax_1")
                  ])
 
 
 
-train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy(),optimizer=Momentum_SGD())
+train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy(),optimizer=SGD())
 
 # train(net, inputs, targets, num_epochs=3000)
 
 for x, y in zip(inputs, targets):
-    predicted = net.forward(x,training=False)
+    test_matrix = np.array([x])
+    predicted = net.forward(test_matrix,training=False)
     print(x, predicted, y)
 
 

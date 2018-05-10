@@ -84,6 +84,59 @@ class BatchNormalization(Layer):
         references:
         https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html
     """
+    def __init__(self,
+                 name,
+                 input_size: int) -> None:
+        super().__init__(name)
+        self.params['gamma'] = np.ones((input_size,))
+        self.params['beta'] = np.ones((input_size, ))
+        self.input_size = input_size
+        self.eps = np.finfo(float).eps
+
+    def forward(self, inputs: Tensor, **kwargs) -> Tensor:
+        N,D = inputs.shape
+        mu = 1./N * np.sum(inputs,axis=0)
+        self.xmu = inputs - mu
+        sq = self.xmu ** 2
+        self.var = 1./N * np.sum(sq, axis=0)
+        self.sqrtvar = np.sqrt(self.var+self.eps)
+        self.ivar = 1./self.sqrtvar
+        self.xhat = self.xmu * self.ivar
+        gammax = self.params['gamma'] * self.xhat
+        self.out = gammax + self.params['beta']
+        
+        return self.out
+
+    def backward(self, grad: Tensor) -> Tensor:
+        N,D = grad.shape
+        dbeta = np.sum(grad, axis=0)
+        dgammax = grad
+        dgamma = np.sum(dgammax*self.xhat, axis=0)
+        dxhat = dgammax * self.params['gamma']
+        divar = np.sum(dxhat*self.xmu, axis=0)
+        dxmu1 = dxhat * self.ivar
+        dsqrtvar = -1./(self.sqrtvar**2) * divar
+        dvar = 0.5 * 1./np.sqrt(self.var+self.eps) * dsqrtvar
+        dsq = 1./N * np.ones((N,D)) * dvar
+        dxmu2 = 2 * self.xmu * dsq
+        dx1 = (dxmu1 + dxmu2)
+        dmu = -1 * np.sum(dxmu1+dxmu2, axis=0)
+        dx2 = 1. /N * np.ones((N,D)) * dmu
+        dx = dx1 + dx2
+        self.grads['gamma'] = dgamma
+        self.grads['beta'] = dbeta
+        return dx
+
+#    def backward(self, dy: Tensor) -> Tensor:
+#        N,D = dy.shape
+#        h = self.out
+#        mu = 1./N*np.sum(h, axis = 0)
+#        var = 1./N*np.sum((h-mu)**2, axis = 0)
+#        self.grads['beta'] = np.sum(dy, axis=0)
+#        self.grads['gamma'] = np.sum((h - mu) * (var + np.finfo(float).eps)**(-1. / 2.) * dy, axis=0)
+#        dh = (1. / N) * self.params['gamma'] * (var + np.finfo(float).eps)**(-1. / 2.) * (N * dy - np.sum(dy, axis=0) - (h - mu) * (var + np.finfo(float).eps)**(-1.0) * np.sum(dy * (h - mu), axis=0))
+#        return dh
+
 
 
 
