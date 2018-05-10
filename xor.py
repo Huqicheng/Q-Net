@@ -5,7 +5,7 @@ from deeplearning.nn import NeuralNet
 from deeplearning.activation import Tanh,Softmax,Sigmoid,ReLU
 from deeplearning.layers import Dense,Dropout,BatchNormalization
 from deeplearning.loss import CrossEntropy
-from deeplearning.optim import Momentum_SGD,SGD
+from deeplearning.optim import Momentum_SGD,SGD,AdaGrad,RMSProp,Adam
 
 inputs = np.array([
                    [0, 0],
@@ -38,16 +38,17 @@ targets = np.array([
                     ])
 
 net = NeuralNet([
-                 Dense(input_size=2, output_size=20, name="dense_1"),
-                 Sigmoid(name="sigmoid_1"),
-                 Dense(input_size=20, output_size=2,name="dense_2"),
-                 BatchNormalization(name="bn_1",input_size=2),
-                 Softmax(name="softmax_1")
-                 ])
+    Dense(input_size=2, output_size=20, name="dense_1"),
+    BatchNormalization(name="bn_1",input_size=20),
+    Sigmoid(name="sigmoid_1"),
+    Dense(input_size=20, output_size=2,name="dense_2"),
+    BatchNormalization(name="bn_2",input_size=2),
+    Softmax(name="softmax_1")
+])
 
 
 
-train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy(),optimizer=SGD())
+train(net, inputs, targets, num_epochs=500,loss=CrossEntropy(),optimizer=Adam())
 
 # train(net, inputs, targets, num_epochs=3000)
 
