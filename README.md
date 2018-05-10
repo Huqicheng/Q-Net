@@ -19,7 +19,8 @@ A simplified deep learning framework.<br>
 
 ## An Example
 
-* Building a Neural Network with one hidden layer and one softmax layer.
+### xor
+#### Building a Neural Network with one hidden layer and one softmax layer.
 net = NeuralNet([<br>
                  Dense(input_size=2, output_size=20),<br>
                  Sigmoid(),<br>
@@ -27,7 +28,7 @@ net = NeuralNet([<br>
                  Dropout(0.5),<br>
                  Softmax()<br>
                  ])<br>
-* Training the Neural Network
+#### Training the Neural Network
 train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
 
 
