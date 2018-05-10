@@ -23,6 +23,6 @@ class NeuralNet:
         for layer in self.layers:
             for name, param in layer.params.items():
                 grad = layer.grads[name]
-                yield param, grad
+                yield layer.name+'_'+name, param, grad
 
 

@@ -5,9 +5,10 @@ from typing import Dict
 
 class Layer:
 
-    def __init__(self) -> None:
+    def __init__(self, name) -> None:
         self.params: Dict[Str,Tensor] = {}
         self.grads: Dict[Str,Tensor] = {}
+        self.name = name
 
     def forward(self,inputs: Tensor, **kwargs) -> Tensor:
         raise NotImplementedError
@@ -25,8 +26,11 @@ class Dense(Layer):
     inputs = (batch_size,input_size)
     outputs = (batch_size,output_size)
     '''
-    def __init__(self,input_size: int,output_size: int) -> None:
-        super().__init__()
+    def __init__(self,
+                 name,
+                 input_size: int,
+                 output_size: int) -> None:
+        super().__init__(name)
         self.params["w"] = np.random.randn(input_size,output_size)
         self.params["b"] = np.random.randn(output_size)
 
@@ -56,8 +60,10 @@ class Dropout(Layer):
         https://blog.csdn.net/stdcoutzyx/article/details/49022443
         https://blog.csdn.net/hjimce/article/details/50413257
     '''
-    def __init__(self, dropout_rate=0.5) -> None:
-        super().__init__()
+    def __init__(self,
+                 name,
+                 dropout_rate=0.5) -> None:
+        super().__init__(name)
         self.dropout_rate = dropout_rate
 
     def forward(self, inputs: Tensor, **kwargs) -> Tensor:

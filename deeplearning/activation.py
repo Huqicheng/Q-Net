@@ -10,8 +10,11 @@ F = Callable[[Tensor],Tensor]
 
 class Activation(Layer):
 
-    def __init__(self,f: F, f_prime: F) -> None:
-        super().__init__()
+    def __init__(self,
+                 name,
+                 f: F,
+                 f_prime: F) -> None:
+        super().__init__(name)
         self.f = f
         self.f_prime = f_prime
     
@@ -30,28 +33,23 @@ class Activation(Layer):
 
 
 class Softmax(Activation):
-    def __init__(self) -> None:
-        super().__init__(softmax, softmax_derivative)
-
+    def __init__(self, name) -> None:
+        super().__init__(name, softmax, softmax_derivative)
 
 
 
 class Tanh(Activation):
-    def __init__(self) -> None:
-        super().__init__(tanh, tanh_derivative)
-
-
+    def __init__(self, name) -> None:
+        super().__init__(name, tanh, tanh_derivative)
 
 
 
 class Sigmoid(Activation):
-    def __init__(self) -> None:
-        super().__init__(sigmoid, sigmoid_derivative)
-
-
+    def __init__(self, name) -> None:
+        super().__init__(name, sigmoid, sigmoid_derivative)
 
 
 
 class ReLU(Activation):
-    def __init__(self) -> None:
-        super().__init__(relu, relu_derivative)
+    def __init__(self, name) -> None:
+        super().__init__(name, relu, relu_derivative)
