@@ -35,4 +35,8 @@ net = NeuralNet([<br>
 #### 4.1.2 Training the Neural Network
 train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
 
+## References
+https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0 <br>
+https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy <br>
+
 
