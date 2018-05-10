@@ -33,7 +33,7 @@ net = NeuralNet([
     Dense(input_size=20, output_size=2),
     Dropout(0.5),
     Softmax()
- ])<br>
+ ])
 ```
 #### 4.1.2 Training the Neural Network
 ```
