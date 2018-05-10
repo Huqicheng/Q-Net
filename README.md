@@ -1,8 +1,9 @@
 DeepLearningFramework
 =====
-A simplified deep learning framework.
+A simplified deep learning framework.<br>
 
 # Implemented Layers
-## Dense
-## Dropout
-## Activations
+
+### Dense
+### Dropout
+### Activations
