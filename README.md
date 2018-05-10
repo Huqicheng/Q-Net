@@ -19,6 +19,7 @@ A simplified deep learning framework.<br>
 
 ## 3. Optimizers
 * SGD <br>
+* Momemtum_SGD <br>
 
 ## 4. Examples
 
