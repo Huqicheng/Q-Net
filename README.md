@@ -3,23 +3,24 @@ DeepLearningFramework
 A simplified deep learning framework.<br>
 
 ## 1. Layers
-* Dense<br>
-* Dropout<br>
-* Activations<br>
+* Dense
+* Dropout
+* Activations
   * Sigmoid
   * Tanh
   * Softmax
   * ReLU
+* BatchNormalization
 
   
 
 ## 2. Loss Functions
-* MSE<br>
-* CrossEntropy<br>
+* MSE
+* CrossEntropy
 
 ## 3. Optimizers
-* SGD <br>
-* Momemtum_SGD <br>
+* SGD 
+* Momemtum_SGD 
 
 ## 4. Examples
 
@@ -45,5 +46,7 @@ train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
 * [Differentiation of Cross Entropy with Softmax Function](https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy)
 * [Introduction of Dropout](https://blog.csdn.net/u010089444/article/details/76725843)
 * [Implementation of Dropout](https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/)
+* [Implementation of forward and backward of BN](https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html)
+* [Difference between training and testing process of BN Layer](https://www.quora.com/How-does-batch-normalization-behave-differently-at-training-time-and-test-time)
 
 
