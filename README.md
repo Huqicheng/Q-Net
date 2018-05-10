@@ -29,16 +29,17 @@ The source code of training a Neural Network to fit the xor function is in xor.p
 #### 4.1.1 Building a Neural Network with one hidden layer and one softmax layer.
 ```
 net = NeuralNet([
-    Dense(input_size=2, output_size=20),
-    Sigmoid(),
-    Dense(input_size=20, output_size=2),
-    Dropout(0.5),
-    Softmax()
- ])
+    Dense(input_size=2, output_size=20, name="dense_1"),
+    BatchNormalization(name="bn_1",input_size=20),
+    Sigmoid(name="sigmoid_1"),
+    Dense(input_size=20, output_size=2,name="dense_2"),
+    BatchNormalization(name="bn_2",input_size=2),
+    Softmax(name="softmax_1")
+])
 ```
 #### 4.1.2 Training the Neural Network
 ```
-train(net, inputs, targets, num_epochs=1000,loss=CrossEntropy())
+train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 ```
 
 ## References
