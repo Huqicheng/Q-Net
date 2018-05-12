@@ -13,7 +13,18 @@ class NeuralNet:
         for layer in self.layers:
             inputs = layer.forward(inputs,training=training)
         return inputs
-    
+
+    def predict(self, inputs: Tensor) -> Tensor:
+        output = self.forward(inputs, training=False)
+        y_pred = output.argmax(axis=1)
+        return y_pred
+
+    def predict_prob(self, inputs: Tensor) -> Tensor:
+        output = self.forward(inputs, training=False)
+        y_pred = output.argmax(axis=1)
+        y_pred_prob = output[0][y_pred[0]]
+        return y_pred_prob
+
     def backward(self, grad: Tensor) -> Tensor:
         for layer in reversed(self.layers):
             grad = layer.backward(grad)

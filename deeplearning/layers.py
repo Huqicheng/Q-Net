@@ -31,8 +31,8 @@ class Dense(Layer):
                  input_size: int,
                  output_size: int) -> None:
         super().__init__(name)
-        self.params["w"] = np.random.randn(input_size,output_size)
-        self.params["b"] = np.random.randn(output_size)
+        self.params["w"] = np.float64(np.random.randn(input_size,output_size))
+        self.params["b"] = np.float64(np.random.randn(output_size))
 
 
     def forward(self,inputs: Tensor, **kwargs) -> Tensor:
@@ -69,9 +69,9 @@ class Dropout(Layer):
     def forward(self, inputs: Tensor, **kwargs) -> Tensor:
         is_training = kwargs['training']
         if is_training:
-            self.mask = np.random.binomial(n=1,p=1-self.dropout_rate,size=inputs.shape[1])
+            self.mask = np.float64(np.random.binomial(n=1,p=1-self.dropout_rate,size=inputs.shape[1]))
         else:
-            self.mask = 1
+            self.mask = 1.
         return inputs*self.mask/(1-self.dropout_rate)
 
     def backward(self, grad: Tensor) -> Tensor:
@@ -90,10 +90,10 @@ class BatchNormalization(Layer):
                  input_size: int,
                  decay: float = 0.99) -> None:
         super().__init__(name)
-        self.params['gamma'] = np.ones((input_size,))
-        self.params['beta'] = np.zeros((input_size,))
-        self.global_mean = np.zeros((input_size,))
-        self.global_var = np.zeros((input_size,))
+        self.params['gamma'] = np.ones((input_size,), dtype='float64')
+        self.params['beta'] = np.zeros((input_size,), dtype='float64')
+        self.global_mean = np.zeros((input_size,), dtype='float64')
+        self.global_var = np.zeros((input_size,), dtype='float64')
         self.decay = decay
         self.input_size = input_size
         self.eps = np.finfo(float).eps

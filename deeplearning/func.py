@@ -9,19 +9,6 @@ def softmax(x: Tensor) -> Tensor:
     res = res.T
     return res
 
-def softmax_grad(o: Tensor) -> Tensor:
-    s = o.reshape(-1,1)
-    return np.diagflat(s) - np.dot(s, s.T)
-
-#def softmax_derivative(x: Tensor) -> Tensor:
-#    output = softmax(x)
-#    assert output.shape == x.shape
-#    gradient = np.zeros((x.shape[0],output.shape[1],x.shape[1]))
-#    for s in range(output.shape[0]):
-#        gradient[s] = softmax_grad(output[s])
-#    return gradient.mean(axis=1)
-
-
 
 def softmax_derivative(x: Tensor) -> Tensor:
     """
@@ -40,9 +27,6 @@ def tanh_derivative(x: Tensor) -> Tensor:
 
 
 
-'''
-    it's right!
-'''
 def sigmoid(x: Tensor) -> Tensor:
     output = 1/(1+np.exp(-x))
     return output
