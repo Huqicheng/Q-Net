@@ -2,6 +2,12 @@ DeepLearningFramework
 =====
 A simplified deep learning framework.<br>
 
+## Requirements
+* Python 3.6
+* Numpy
+* Scipy
+
+
 ## 1. Layers
 * Dense
 * Dropout
