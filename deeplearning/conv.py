@@ -1,61 +1,12 @@
 import numpy as np
 from deeplearning.layers import Layer
+from deeplearning.conv_utils import *
 
 """
     Stanford CS239n
     
     https://wiseodd.github.io/techblog/2016/07/16/convnet-conv-layer/
 """
-
-def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
-    # First figure out what the size of the output should be
-    N, C, H, W = x_shape
-    assert (H + 2 * padding - field_height) % stride == 0
-    assert (W + 2 * padding - field_height) % stride == 0
-    out_height = int((H + 2 * padding - field_height) / stride + 1)
-    out_width = int((W + 2 * padding - field_width) / stride + 1)
-    
-    i0 = np.repeat(np.arange(field_height), field_width)
-    i0 = np.tile(i0, C)
-    i1 = stride * np.repeat(np.arange(out_height), out_width)
-    j0 = np.tile(np.arange(field_width), field_height * C)
-    j1 = stride * np.tile(np.arange(out_width), out_height)
-    i = i0.reshape(-1, 1) + i1.reshape(1, -1)
-    j = j0.reshape(-1, 1) + j1.reshape(1, -1)
-    
-    k = np.repeat(np.arange(C), field_height * field_width).reshape(-1, 1)
-    
-    return (k.astype(int), i.astype(int), j.astype(int))
-
-
-def im2col_indices(x, field_height, field_width, padding=1, stride=1):
-    """ An implementation of im2col based on some fancy indexing """
-    # Zero-pad the input
-    p = padding
-    x_padded = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), mode='constant')
-    
-    k, i, j = get_im2col_indices(x.shape, field_height, field_width, padding, stride)
-    
-    cols = x_padded[:, k, i, j]
-    C = x.shape[1]
-    cols = cols.transpose(1, 2, 0).reshape(field_height * field_width * C, -1)
-    return cols
-
-
-def col2im_indices(cols, x_shape, field_height=3, field_width=3, padding=1,
-                   stride=1):
-    """ An implementation of col2im based on fancy indexing and np.add.at """
-    N, C, H, W = x_shape
-    H_padded, W_padded = H + 2 * padding, W + 2 * padding
-    x_padded = np.zeros((N, C, H_padded, W_padded), dtype=cols.dtype)
-    k, i, j = get_im2col_indices(x_shape, field_height, field_width, padding, stride)
-    cols_reshaped = cols.reshape(C * field_height * field_width, -1, N)
-    cols_reshaped = cols_reshaped.transpose(2, 0, 1)
-    np.add.at(x_padded, (slice(None), k, i, j), cols_reshaped)
-    if padding == 0:
-        return x_padded
-    return x_padded[:, :, padding:-padding, padding:-padding]
-
 
 
 def conv_forward(X, W, b, stride=1, padding=1):
@@ -81,7 +32,9 @@ def conv_forward(X, W, b, stride=1, padding=1):
     
     return out, cache
 
-
+"""
+    1 padding and 1 stride will keep the input size
+"""
 def conv_backward(dout, cache):
     X, W, b, stride, padding, X_col = cache
     n_filter, d_filter, h_filter, w_filter = W.shape
@@ -101,51 +54,52 @@ def conv_backward(dout, cache):
 
 
 
+
+
+
+
 class Convolution_2D(Layer):
     
     def __init__(self,
                  name,
                  input_shape: Tuple[int],
                  output_shape: Tuple[int],
-                 mask_shape: Tuple[int]) -> None:
+                 filter_shape: Tuple[int],
+                 padding: int = 1,
+                 stride: int = 1) -> None:
         super().__init__(name)
-        self.params["w"] = np.random.randn(input_size,output_size)
-        self.params["b"] = np.random.randn(output_size)
+        
+        self.input_shape = input_shape
+        self.output_shape = output_shape
+        self.filter_shape = filter_shape
+        self.padding = padding
+        self.stride = stride
+        
+        input_n,input_d,input_h,input_w = input_shape
+        fan_out = filter_shape[0] * np.prod(filter_shape[2:]
+        W_bound = numpy.sqrt(6. / ( input_n + fan_out))
+        self.params["w"] = np.asarray(
+                                rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
+                                dtype="float64"
+                            )
+        self.params["b"] = np.zeros((filter_shape[0],), dtype="float64")
             
             
     def forward(self,inputs: Tensor, **kwargs) -> Tensor:
-        self.inputs = inputs
-        return inputs@self.params["w"]+self.params["b"]
+        out,self.cache = conv_forward(
+                                    inputs,
+                                    self.params['w'],
+                                    self.params['b'],
+                                    stride=self.stride,
+                                    padding=self.padding
+                                )
+                                            
+        return out
             
-    '''
-        d net / d w
-        d net / d b which is not a nueron in the nn, so doesn't backprop it
-                     
-        d (f(wx+b)) / d x = f'(wx+b)*(d (x@w+b) / d x) = grad * wT
-    '''
+    
     def backward(self,grad: Tensor) -> Tensor:
-        self.grads["b"] = np.sum(grad,axis=0)
-        self.grads["w"] = self.inputs.T @ grad
-        return grad @ self.params["w"].T
+        dx, self,grads['w'], self.grads['b'] = conv_backward(grad, self.cache)
+        return dx
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                            
