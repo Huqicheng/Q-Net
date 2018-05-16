@@ -3,6 +3,7 @@ from deeplearning.nn import NeuralNet
 from deeplearning.loss import Loss, MSE
 from deeplearning.optim import Optimizer, SGD
 from deeplearning.data import DataIterator, BatchIterator
+from deeplearning.evaluation import accurarcy
 
 
 def train(net: NeuralNet,
@@ -11,7 +12,7 @@ def train(net: NeuralNet,
           num_epochs: int = 200,
           iterator: DataIterator = BatchIterator(),
           loss: Loss = MSE(),
-          optimizer: Optimizer = SGD(lr=0.02)) -> None:
+          optimizer: Optimizer = SGD(lr=0.2)) -> None:
     for epoch in range(num_epochs):
         epoch_loss = 0.0
         for batch in iterator(inputs, targets):

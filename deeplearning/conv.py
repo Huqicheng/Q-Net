@@ -1,6 +1,8 @@
 import numpy as np
 from deeplearning.layers import Layer
 from deeplearning.conv_utils import *
+from deeplearning.tensor import Tensor
+from typing import Tuple
 
 """
     Stanford CS239n
@@ -27,7 +29,8 @@ def conv_forward(X, W, b, stride=1, padding=1):
     out = W_col @ X_col + b
     out = out.reshape(n_filters, h_out, w_out, n_x)
     out = out.transpose(3, 0, 1, 2)
-    
+
+        
     cache = (X, W, b, stride, padding, X_col)
     
     return out, cache
@@ -63,29 +66,29 @@ class Convolution_2D(Layer):
     def __init__(self,
                  name,
                  input_shape: Tuple[int],
-                 output_shape: Tuple[int],
                  filter_shape: Tuple[int],
                  padding: int = 1,
                  stride: int = 1) -> None:
         super().__init__(name)
         
+        rng = np.random.RandomState(23455)
+        
         self.input_shape = input_shape
-        self.output_shape = output_shape
         self.filter_shape = filter_shape
         self.padding = padding
         self.stride = stride
         
-        input_n,input_d,input_h,input_w = input_shape
-        fan_out = filter_shape[0] * np.prod(filter_shape[2:]
-        W_bound = numpy.sqrt(6. / ( input_n + fan_out))
+        input_d,input_h,input_w = input_shape
+        fan_out = filter_shape[0] * np.prod(filter_shape[2:])
+        w_bound = np.sqrt(6. / ( 32 + fan_out))
         self.params["w"] = np.asarray(
-                                rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
+                                rng.uniform(low=-w_bound, high=w_bound, size=filter_shape),
                                 dtype="float64"
                             )
-        self.params["b"] = np.zeros((filter_shape[0],), dtype="float64")
+        self.params["b"] = np.zeros((filter_shape[0],1), dtype="float64")
             
             
-    def forward(self,inputs: Tensor, **kwargs) -> Tensor:
+    def forward(self, inputs: Tensor, **kwargs) -> Tensor:
         out,self.cache = conv_forward(
                                     inputs,
                                     self.params['w'],
@@ -97,8 +100,8 @@ class Convolution_2D(Layer):
         return out
             
     
-    def backward(self,grad: Tensor) -> Tensor:
-        dx, self,grads['w'], self.grads['b'] = conv_backward(grad, self.cache)
+    def backward(self, grad: Tensor) -> Tensor:
+        dx, self.grads['w'], self.grads['b'] = conv_backward(grad, self.cache)
         return dx
 
 

@@ -1,6 +1,8 @@
 from deeplearning.pool_utils import *
 from deeplearning.layers import Layer
 from deeplearning.conv_utils import *
+from deeplearning.tensor import Tensor
+import numpy as np
 
 def _pool_forward(X, pool_fun, size=2, stride=2):
     n, d, h, w = X.shape
@@ -19,7 +21,9 @@ def _pool_forward(X, pool_fun, size=2, stride=2):
     
     out = out.reshape(h_out, w_out, n, d)
     out = out.transpose(2, 3, 0, 1)
-    
+
+
+
     cache = (X, size, stride, X_col, pool_cache)
     
     return out, cache
@@ -35,19 +39,16 @@ def _pool_backward(dout, dpool_fun, cache):
     dX = dpool_fun(dX_col, dout_col, pool_cache)
     
     dX = col2im_indices(dX_col, (n * d, 1, h, w), size, size, padding=0, stride=stride)
-        dX = dX.reshape(X.shape)
+    dX = dX.reshape(X.shape)
     
     return dX
 
 
 class Pool_2D(Layer):
     
-    def __init__(self,
-                 name,
+    def __init__(self, name, pool_fun, dpool_fun,
                  size: int = 2,
-                 stride: int = 2,
-                 pool_fun,
-                 dpool_fun) -> None:
+                 stride: int = 2) -> None:
         
         super().__init__(name)
         self.size = size
@@ -61,7 +62,7 @@ class Pool_2D(Layer):
         return out
 
     def backward(self,grad: Tensor) -> Tensor:
-        return _pool_forward(grad, self.dpool_fun, self.cache)
+        return _pool_backward(grad, self.dpool_fun, self.cache)
 
 
 class Max_Pool_2D(Pool_2D):
@@ -69,7 +70,7 @@ class Max_Pool_2D(Pool_2D):
                  name,
                  size: int = 2,
                  stride: int = 2 ):
-        super().__init__(name,size,stride,maxpool,dmaxpool)
+        super().__init__(name,maxpool,dmaxpool,size,stride)
 
 
 class Avg_Pool_2D(Pool_2D):
@@ -77,7 +78,7 @@ class Avg_Pool_2D(Pool_2D):
                  name,
                  size: int = 2,
                  stride: int = 2 ):
-        super().__init__(name,size,stride,avgpool,davgpool)
+        super().__init__(name,avgpool,davgpool,size,stride)
 
 
 

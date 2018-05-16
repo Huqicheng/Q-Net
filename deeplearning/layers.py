@@ -1,7 +1,7 @@
 from deeplearning.tensor import Tensor
 
 import numpy as np
-from typing import Dict
+from typing import Dict,Tuple
 
 class Layer:
 
@@ -77,6 +77,18 @@ class Dropout(Layer):
     def backward(self, grad: Tensor) -> Tensor:
         return grad*self.mask/(1-self.dropout_rate)
 
+class Flatten(Layer):
+    def __init__(self,
+                 name) -> None:
+        super().__init__(name)
+        
+
+    def forward(self, inputs: Tensor, **kwargs) -> Tensor:
+        self.input_shape = inputs.shape
+        return inputs.flatten().reshape(inputs.shape[0],-1)
+
+    def backward(self, grad: Tensor) -> Tensor:
+        return grad.reshape(self.input_shape)
 
 
 class BatchNormalization(Layer):
