@@ -31,6 +31,7 @@ dataset = load_data()
 
 net = NeuralNet([
                     Convolution_2D(name="conv_1", input_shape=(1,28,28),filter_shape=(10,1,3,3),padding=1,stride=1),
+                    Sigmoid(name="sigmoid_1"),
                     Avg_Pool_2D(name="avg_pool_1", size=2, stride=2),
                     Flatten(name="flat_1"),
                     Dense(input_size=14*14*10, output_size=10, name="dense_1"),
@@ -40,7 +41,7 @@ net = NeuralNet([
                  
                 ])
 
-train(net, dataset["test_images"][0:1000], dataset["test_labels"][0:1000], num_epochs=50,loss=CrossEntropy(),optimizer=Adam())
+train(net, dataset["test_images"][1000:5000], dataset["test_labels"][1000:5000], num_epochs=50,loss=CrossEntropy(),optimizer=Adam())
 
 
 y_test = np.argmax(dataset["test_labels"][0:1000],axis=1)
