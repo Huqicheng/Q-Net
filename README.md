@@ -64,6 +64,6 @@ train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 * [Implementation of Different Optimizers](https://wiseodd.github.io/techblog/2016/06/22/nn-optimization/)
 * [Implementation of Forward and Backward of BN](https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html)
 * [Difference between Training and Testing of BN Layer](https://www.quora.com/How-does-batch-normalization-behave-differently-at-training-time-and-test-time)
-* [CS239n] http://cs231n.github.io/convolutional-networks/
+* [Stanford CS239n](http://cs231n.github.io/convolutional-networks/)
 
 
