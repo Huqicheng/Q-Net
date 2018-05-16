@@ -1,5 +1,14 @@
 from deeplearning.tensor import Tensor
 
+
+"""
+    tricks of DL
+    
+    http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html
+"""
+
+
+
 import numpy as np
 from typing import Dict,Tuple
 

@@ -76,3 +76,12 @@ def relu_derivative(x: Tensor) -> Tensor:
     output = relu(x)
     output[output>0]=1
     return output
+
+
+
+
+
+
+
+
+

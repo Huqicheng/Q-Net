@@ -8,6 +8,8 @@ from typing import Tuple
     Stanford CS239n
     
     https://wiseodd.github.io/techblog/2016/07/16/convnet-conv-layer/
+    
+    http://cs231n.github.io/convolutional-networks/
 """
 
 

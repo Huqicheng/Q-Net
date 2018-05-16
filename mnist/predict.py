@@ -31,10 +31,13 @@ dataset = load_data()
 
 net = NeuralNet([
                     Convolution_2D(name="conv_1", input_shape=(1,28,28),filter_shape=(10,1,3,3),padding=1,stride=1),
-                    Sigmoid(name="sigmoid_1"),
+                    ReLU(name="relu_1"),
                     Avg_Pool_2D(name="avg_pool_1", size=2, stride=2),
+                    Convolution_2D(name="conv_2", input_shape=(10,14,14),filter_shape=(20,10,3,3),padding=1,stride=1),
+                    ReLU(name="relu_2"),
+                    Avg_Pool_2D(name="avg_pool_2", size=2, stride=2),
                     Flatten(name="flat_1"),
-                    Dense(input_size=14*14*10, output_size=10, name="dense_1"),
+                    Dense(input_size=7*7*20, output_size=10, name="dense_1"),
                     BatchNormalization(name="bn_1",input_size=10),
                     Softmax(name="softmax_1")
                  
