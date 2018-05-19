@@ -67,7 +67,6 @@ class Convolution_2D(Layer):
     
     def __init__(self,
                  name,
-                 input_shape: Tuple[int],
                  filter_shape: Tuple[int],
                  padding: int = 1,
                  stride: int = 1) -> None:
@@ -75,12 +74,12 @@ class Convolution_2D(Layer):
         
         rng = np.random.RandomState(23455)
         
-        self.input_shape = input_shape
+        # self.input_shape = input_shape
         self.filter_shape = filter_shape
         self.padding = padding
         self.stride = stride
         
-        input_d,input_h,input_w = input_shape
+        # input_d,input_h,input_w = input_shape
         fan_out = filter_shape[0] * np.prod(filter_shape[2:])
         w_bound = np.sqrt(6. / ( 32 + fan_out))
         self.params["w"] = np.asarray(

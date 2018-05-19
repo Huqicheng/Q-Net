@@ -8,7 +8,7 @@ from deeplearning.utils import one_hot
 from deeplearning.train import train
 from deeplearning.nn import NeuralNet
 from deeplearning.activation import Tanh,Softmax,Sigmoid,ReLU
-from deeplearning.layers import Dense,Dropout,BatchNormalization,Flatten
+from deeplearning.layers import Dense,Dropout,BatchNormalization,Flatten,SpatialBatchNormalization
 from deeplearning.loss import MSE, CrossEntropy
 from deeplearning.optim import Momentum_SGD,SGD,AdaGrad,RMSProp,Adam
 from deeplearning.evaluation import accurarcy
@@ -30,21 +30,26 @@ def load_data():
 dataset = load_data()
 
 net = NeuralNet([
-                    Convolution_2D(name="conv_1", input_shape=(1,28,28),filter_shape=(10,1,3,3),padding=1,stride=1),
-                    ReLU(name="relu_1"),
+                    Convolution_2D(name="conv_1", filter_shape=(10,1,3,3),padding=1,stride=1),
                     Avg_Pool_2D(name="avg_pool_1", size=2, stride=2),
-                    Convolution_2D(name="conv_2", input_shape=(10,14,14),filter_shape=(20,10,3,3),padding=1,stride=1),
-                    ReLU(name="relu_2"),
+                    SpatialBatchNormalization(name="sbn_1",input_channel=10),
+                    ReLU(name="relu_1"),
+                    Convolution_2D(name="conv_2", filter_shape=(20,10,3,3),padding=1,stride=1),
                     Avg_Pool_2D(name="avg_pool_2", size=2, stride=2),
+                    SpatialBatchNormalization(name="sbn_2",input_channel=20),
+                    ReLU(name="relu_2"),
                     Flatten(name="flat_1"),
-                    Dense(input_size=7*7*20, output_size=10, name="dense_1"),
-                    BatchNormalization(name="bn_1",input_size=10),
+                    Dense(input_size=7*7*20, output_size=100, name="dense_1"),
+                    BatchNormalization(name="bn_1",input_size=100),
+                    ReLU(name="relu_3"),
+                    Dense(input_size=100, output_size=10, name="dense_2"),
+                    BatchNormalization(name="bn_2",input_size=10),
                     Softmax(name="softmax_1")
                  
                  
                 ])
 
-train(net, dataset["test_images"][1000:5000], dataset["test_labels"][1000:5000], num_epochs=50,loss=CrossEntropy(),optimizer=Adam())
+train(net, dataset["test_images"][0:1000], dataset["test_labels"][0:1000], num_epochs=20,loss=CrossEntropy(),optimizer=Adam())
 
 
 y_test = np.argmax(dataset["test_labels"][0:1000],axis=1)

@@ -147,6 +147,7 @@ class Adam(Optimizer):
     def step(self, net: NeuralNet) -> None:
     
         for name, param, grad in net.params_and_grads():
+            # print(name)
             self.velocity[name] = self.get_velocity(name) * self.gamma_v + (1 - self.gamma_v) * grad
             self.cache[name] = self.get_cache(name) * self.gamma_c + (1 - self.gamma_c) * grad**2
             
