@@ -28,9 +28,9 @@ class Layer:
     def backward(self,grad: Tensor) -> Tensor:
         raise NotImplementedError
 
-    def get_params(self):
+    def get_params_grads(self):
         for name, param in self.params.items():
-            yield name, name ,param
+            yield name, name ,param, self.grads[name]
 
 class Identity(Layer):
     """
@@ -84,7 +84,7 @@ class Dense(Layer):
 
 class Dropout(Layer):
     '''
-        Randomly ignore some signals.
+        Randomly ignore some signals while training.
         
         reference:
         1. https://blog.csdn.net/stdcoutzyx/article/details/49022443
@@ -133,7 +133,7 @@ class Concatenation(Layer):
     def forward(self, inputs: Tensor, **kwargs) -> Tensor:
         output = []
         for module in self.modules:
-            output.append(module.forward(inputs))
+            output.append(module.forward(inputs,training=kwargs["training"]))
 
         return output
 
@@ -147,13 +147,13 @@ class Concatenation(Layer):
                 dx += g
         return dx
 
-    def get_params(self):
+    def get_params_grads(self):
         """
             return  (name in the map of optimizer, real param name, param)
         """
         for module in self.modules:
-            for name, param in module.get_params.items():
-                yield module.name+'_'+name, name, param
+            for map_name,name, param, grad in module.get_params_grads():
+                yield module.name+'_'+map_name, name, param, grad
 
 
 class Add(Layer):
@@ -171,7 +171,6 @@ class Add(Layer):
                 output = input
             else:
                 output += input
-
         return output
 
     def backward(self, grad: Tensor) -> Tensor:

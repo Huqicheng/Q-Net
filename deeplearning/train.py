@@ -1,12 +1,12 @@
 from deeplearning.tensor import Tensor
-from deeplearning.nn import NeuralNet
+from deeplearning.nn import NeuralNet,Sequential
 from deeplearning.loss import Loss, MSE
 from deeplearning.optim import Optimizer, SGD
 from deeplearning.data import DataIterator, BatchIterator
 from deeplearning.evaluation import accurarcy
 
 
-def train(net: NeuralNet,
+def train(net: Sequential,
           inputs: Tensor,
           targets: Tensor,
           num_epochs: int = 200,

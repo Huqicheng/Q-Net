@@ -37,8 +37,7 @@ class NeuralNet(Layer):
 
     def params_and_grads(self) -> Iterator[Tuple[Tensor, Tensor]]:
         for layer in self.layers:
-            for map_name, name, param in layer.get_params():
-                grad = layer.grads[name]
+            for map_name, name, param, grad in layer.get_params_grads():
                 yield layer.name+'_'+map_name, param, grad
 
 
@@ -48,7 +47,8 @@ class Sequential(Layer):
         Gather modules as a sequence.
     """
     
-    def __init__(self, layers: Sequence[Layer]) -> None:
+    def __init__(self, name, layers: Sequence[Layer]) -> None:
+        super().__init__(name)
         self.layers = layers
     
     def forward(self, inputs: Tensor, **kwargs) -> Tensor:
@@ -75,17 +75,16 @@ class Sequential(Layer):
 
     def params_and_grads(self) -> Iterator[Tuple[Tensor, Tensor]]:
         for layer in self.layers:
-            for name, param in layer.get_params():
-                grad = layer.grads[name]
-                yield layer.name+'_'+name, param, grad
+            for map_name, name, param, grad in layer.get_params_grads():
+                yield layer.name+'_'+map_name, param, grad
 
-    def get_params(self):
+    def get_params_grads(self):
         """
-            return  (name in the map of optimizer, real param name, param)
+            return  (name in the map of optimizer, real param name, param, grad)
         """
         for module in self.layers:
-            for map_name, name, param in module.get_params():
-                yield module.name+'_'+map_name, name, param
+            for map_name, name, param, grad in module.get_params_grads():
+                yield module.name+'_'+map_name, name, param, grad
 
 
 
