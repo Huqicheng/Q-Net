@@ -33,20 +33,20 @@ dataset = load_data()
 net = Sequential(
                  name = "residual_net",
                  layers = [
-                    res_block(name="res_block_1",n_channels=1,n_out_channels=10,stride=1),
+                    res_block(name="res_block_1",n_channels=1,n_out_channels=5,stride=2),
                     Flatten(name="flat_1"),
-                    Dense(input_size=28*28*10, output_size=10, name="dense_1"),
+                    Dense(input_size=14*14*5, output_size=10, name="dense_1"),
                     BatchNormalization(name="bn_1",input_size=10),
                     Softmax(name="softmax_1")
                  
                  
                 ])
 
-train(net, dataset["test_images"][0:1000], dataset["test_labels"][0:1000], num_epochs=20,loss=CrossEntropy(),optimizer=Adam())
+train(net, dataset["test_images"][1000:5000], dataset["test_labels"][1000:5000], num_epochs=20,loss=CrossEntropy(),optimizer=Adam())
 
 
-y_test = np.argmax(dataset["test_labels"][1000:2000],axis=1)
-print(accurarcy(net.predict(dataset["test_images"][1000:2000]), y_test))
+y_test = np.argmax(dataset["test_labels"][0:1000],axis=1)
+print(accurarcy(net.predict(dataset["test_images"][0:1000]), y_test))
 
 for map_name,name,param,grad in net.get_params_grads():
     print(map_name,",",name)

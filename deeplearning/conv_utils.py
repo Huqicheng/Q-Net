@@ -7,13 +7,12 @@ import numpy as np
     https://wiseodd.github.io/techblog/2016/07/16/convnet-conv-layer/
 """
 
-def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
+def get_im2col_indices(x_shape, field_height, field_width, stride=1):
     # First figure out what the size of the output should be
     N, C, H, W = x_shape
-    assert (H + 2 * padding - field_height) % stride == 0
-    assert (W + 2 * padding - field_height) % stride == 0
-    out_height = int((H + 2 * padding - field_height) / stride + 1)
-    out_width = int((W + 2 * padding - field_width) / stride + 1)
+    
+    out_height = int((H - field_height) / stride + 1)
+    out_width = int((W - field_width) / stride + 1)
     
     i0 = np.repeat(np.arange(field_height), field_width)
     i0 = np.tile(i0, C)
@@ -28,76 +27,30 @@ def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
     return (k.astype(int), i.astype(int), j.astype(int))
 
 
-def im2col_indices(x, field_height, field_width, padding=1, stride=1):
+def im2col_indices(x_padded, field_height, field_width, stride=1):
     """ An implementation of im2col based on some fancy indexing """
-    # Zero-pad the input
-    p = padding
-    x_padded = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), mode='constant')
-    
-    k, i, j = get_im2col_indices(x.shape, field_height, field_width, padding, stride)
+    k, i, j = get_im2col_indices(x_padded.shape, field_height, field_width, stride)
     
     cols = x_padded[:, k, i, j]
-    C = x.shape[1]
+    C = x_padded.shape[1]
     cols = cols.transpose(1, 2, 0).reshape(field_height * field_width * C, -1)
     return cols
 
 
-def col2im_indices(cols, x_shape, field_height=3, field_width=3, padding=1,
-                   stride=1):
+def col2im_indices(cols, x_shape, field_height=3, field_width=3, stride=1):
     """ An implementation of col2im based on fancy indexing and np.add.at """
     N, C, H, W = x_shape
-    H_padded, W_padded = H + 2 * padding, W + 2 * padding
+    H_padded, W_padded = x_shape[2], x_shape[3]
     x_padded = np.zeros((N, C, H_padded, W_padded), dtype=cols.dtype)
-    k, i, j = get_im2col_indices(x_shape, field_height, field_width, padding, stride)
+    k, i, j = get_im2col_indices(x_shape, field_height, field_width, stride)
     cols_reshaped = cols.reshape(C * field_height * field_width, -1, N)
     cols_reshaped = cols_reshaped.transpose(2, 0, 1)
     np.add.at(x_padded, (slice(None), k, i, j), cols_reshaped)
-    if padding == 0:
-        return x_padded
-    return x_padded[:, :, padding:-padding, padding:-padding]
+    
+    return x_padded
 
 
 
-def conv_forward(X, W, b, stride=1, padding=1):
-    cache = W, b, stride, padding
-    n_filters, d_filter, h_filter, w_filter = W.shape
-    n_x, d_x, h_x, w_x = X.shape
-    h_out = (h_x - h_filter + 2 * padding) / stride + 1
-    w_out = (w_x - w_filter + 2 * padding) / stride + 1
-    
-    if not h_out.is_integer() or not w_out.is_integer():
-        raise Exception('Invalid output dimension!')
-
-    h_out, w_out = int(h_out), int(w_out)
-
-    X_col = im2col_indices(X, h_filter, w_filter, padding=padding, stride=stride)
-    W_col = W.reshape(n_filters, -1)
-    
-    out = W_col @ X_col + b
-    out = out.reshape(n_filters, h_out, w_out, n_x)
-    out = out.transpose(3, 0, 1, 2)
-    
-    cache = (X, W, b, stride, padding, X_col)
-    
-    return out, cache
-
-
-def conv_backward(dout, cache):
-    X, W, b, stride, padding, X_col = cache
-    n_filter, d_filter, h_filter, w_filter = W.shape
-    
-    db = np.sum(dout, axis=(0, 2, 3))
-    db = db.reshape(n_filter, -1)
-    
-    dout_reshaped = dout.transpose(1, 2, 3, 0).reshape(n_filter, -1)
-    dW = dout_reshaped @ X_col.T
-    dW = dW.reshape(W.shape)
-    
-    W_reshape = W.reshape(n_filter, -1)
-    dX_col = W_reshape.T @ dout_reshaped
-    dX = col2im_indices(dX_col, X.shape, h_filter, w_filter, padding=padding, stride=stride)
-    
-    return dX, dW, db
 
 
 

@@ -180,6 +180,39 @@ class Add(Layer):
         return dx
 
 
+class Padding(Layer):
+    """
+        Padding the input to the indicated shape.
+    """
+    def __init__(self,name,
+                 dim: Tuple[int],
+                 pad: int) -> None:
+        super().__init__(name)
+        self.dim = dim
+        self.pad = pad
+    
+    def forward(self, inputs: Tensor, **kwargs) -> Tensor:
+        pads = []
+        self.ndim = inputs.ndim
+        for axis in range(inputs.ndim):
+            if axis in self.dim:
+                pads += [(self.pad, self.pad)]
+            else:
+                pads += [(0,0)]
+        pads = tuple(pads)
+        output = np.pad(inputs, pads, mode="constant")
+        return output
+    
+    def backward(self, grad: Tensor) -> Tensor:
+        slc = [slice(None)] * self.ndim
+        dx = grad
+        for axis in range(self.ndim):
+            if axis in self.dim:
+                slc[axis] = slice(self.pad, -self.pad)
+        dx = grad[slc]
+        return dx
+
+
 
 class BatchNormalization(Layer):
     """

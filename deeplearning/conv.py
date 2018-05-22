@@ -17,23 +17,35 @@ def conv_forward(X, W, b, stride=1, padding=1):
     cache = W, b, stride, padding
     n_filters, d_filter, h_filter, w_filter = W.shape
     n_x, d_x, h_x, w_x = X.shape
-    h_out = (h_x - h_filter + 2 * padding) / stride + 1
-    w_out = (w_x - w_filter + 2 * padding) / stride + 1
     
-    if not h_out.is_integer() or not w_out.is_integer():
-        raise Exception('Invalid output dimension!')
+    x_padded = np.pad(X, ((0,0),(0,0),(padding,padding),(padding,padding)), mode="constant")
+    
+    tiles_w = (w_x + (2 * padding) - w_filter) % stride
+    tiles_h = (h_x + (2 * padding) - h_filter) % stride
+    
+    if not tiles_w == 0:
+        x_padded = x_padded[:, :, :, :-tiles_w]
+    if not tiles_h == 0:
+        x_padded = x_padded[:, :, :-tiles_h, :]
 
-    h_out, w_out = int(h_out), int(w_out)
+    n_x, d_x, h_x, w_x = x_padded.shape
 
-    X_col = im2col_indices(X, h_filter, w_filter, padding=padding, stride=stride)
+    assert (w_x - w_filter) % stride == 0, 'width does not work'
+    assert (h_x - h_filter) % stride == 0, 'height does not work'
+
+    out_h, out_w = int((h_x - h_filter) / stride + 1), int((w_x - w_filter) / stride + 1)
+
+
+    X_col = im2col_indices(x_padded, h_filter, w_filter, stride=stride)
     W_col = W.reshape(n_filters, -1)
     
+    
     out = W_col @ X_col + b
-    out = out.reshape(n_filters, h_out, w_out, n_x)
+    out = out.reshape(n_filters, out_h, out_w, n_x)
     out = out.transpose(3, 0, 1, 2)
 
         
-    cache = (X, W, b, stride, padding, X_col)
+    cache = (X, x_padded.shape, tiles_h,tiles_w, W, b, stride, padding, X_col)
     
     return out, cache
 
@@ -41,7 +53,7 @@ def conv_forward(X, W, b, stride=1, padding=1):
     1 padding and 1 stride will keep the input size
 """
 def conv_backward(dout, cache):
-    X, W, b, stride, padding, X_col = cache
+    X, x_padded_shape, tiles_h, tiles_w, W, b, stride, padding, X_col = cache
     n_filter, d_filter, h_filter, w_filter = W.shape
     
     db = np.sum(dout, axis=(0, 2, 3))
@@ -53,7 +65,9 @@ def conv_backward(dout, cache):
     
     W_reshape = W.reshape(n_filter, -1)
     dX_col = W_reshape.T @ dout_reshaped
-    dX = col2im_indices(dX_col, X.shape, h_filter, w_filter, padding=padding, stride=stride)
+    dX = col2im_indices(dX_col, x_padded_shape, h_filter, w_filter, stride=stride)
+    
+    dX = dX[:, :, padding:-(padding-tiles_h), padding:-(padding-tiles_w)]
     
     return dX, dW, db
 
@@ -76,6 +90,8 @@ class Convolution_2D(Layer):
         
         # self.input_shape = input_shape
         self.filter_shape = filter_shape
+        
+        
         self.padding = padding
         self.stride = stride
         
@@ -86,6 +102,8 @@ class Convolution_2D(Layer):
                                 rng.uniform(low=-w_bound, high=w_bound, size=filter_shape),
                                 dtype="float64"
                             )
+                            
+        
         self.params["b"] = np.zeros((filter_shape[0],1), dtype="float64")
             
             

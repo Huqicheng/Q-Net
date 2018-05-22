@@ -15,7 +15,7 @@ def _pool_forward(X, pool_fun, size=2, stride=2):
     h_out, w_out = int(h_out), int(w_out)
 
     X_reshaped = X.reshape(n * d, 1, h, w)
-    X_col = im2col_indices(X_reshaped, size, size, padding=0, stride=stride)
+    X_col = im2col_indices(X_reshaped, size, size, stride=stride)
     
     out, pool_cache = pool_fun(X_col)
     
@@ -38,7 +38,7 @@ def _pool_backward(dout, dpool_fun, cache):
     
     dX = dpool_fun(dX_col, dout_col, pool_cache)
     
-    dX = col2im_indices(dX_col, (n * d, 1, h, w), size, size, padding=0, stride=stride)
+    dX = col2im_indices(dX_col, (n * d, 1, h, w), size, size, stride=stride)
     dX = dX.reshape(X.shape)
     
     return dX
