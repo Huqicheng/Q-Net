@@ -12,26 +12,75 @@ from typing import Tuple
     http://cs231n.github.io/convolutional-networks/
 """
 
+def pad_same(X, filter_h, filter_w, stride):
+    """
+        new_shape = input_shape/stride
+        
+        reference:
+            https://www.jianshu.com/p/05c4f1621c7e
+    """
+    
+    N,C,H,W = X.shape
+    
+    w_need_pad = (W/stride - 1) * stride + filter_w - W
+    h_need_pad = (H/stride - 1) * stride + filter_h - H
+    
+    w_need_pad = max(0,int(w_need_pad))
+    h_need_pad = max(0,int(h_need_pad))
+    
+    w_padding = int(w_need_pad / 2)
+    h_padding = int(h_need_pad / 2)
 
-def conv_forward(X, W, b, stride=1, padding=1):
+    if w_need_pad % 2 == 0:
+        if h_need_pad % 2 == 0:
+            w_pad_left,w_pad_right,h_pad_up,h_pad_down = w_padding,w_padding,h_padding,h_padding
+            x_padded = np.pad(X, ((0,0),(0,0),(h_padding,h_padding),(w_padding,w_padding)), mode="constant")
+        else:
+            assert h_padding+1+h_padding == h_need_pad
+            w_pad_left,w_pad_right,h_pad_up,h_pad_down = w_padding,w_padding,h_padding+1,h_padding
+            x_padded = np.pad(X, ((0,0),(0,0),(h_padding+1,h_padding),(w_padding,w_padding)), mode="constant")
+    else:
+        if h_need_pad % 2 == 0:
+            w_pad_left,w_pad_right,h_pad_up,h_pad_down = w_padding+1,w_padding,h_padding,h_padding
+            x_padded = np.pad(X, ((0,0),(0,0),(h_padding,h_padding),(w_padding+1,w_padding)), mode="constant")
+        else:
+            assert h_padding+1+h_padding == h_need_pad
+            assert w_padding+1+w_padding == w_need_pad
+            w_pad_left,w_pad_right,h_pad_up,h_pad_down = w_padding+1,w_padding,h_padding+1,h_padding
+            x_padded = np.pad(X, ((0,0),(0,0),(h_padding+1,h_padding),(w_padding+1,w_padding)), mode="constant")
+
+    return x_padded, (w_pad_left,w_pad_right,h_pad_up,h_pad_down)
+
+
+
+def pad_valid(X, filter_h, filter_w, stride):
+    """
+        new_shape = (input_shape-filter+1)/stride
+        
+        reference:
+        https://www.jianshu.com/p/05c4f1621c7e
+        """
+
+    return X, (0,0,0,0)
+
+
+
+def conv_forward(X, W, b, stride=1, padding="same"):
     cache = W, b, stride, padding
     n_filters, d_filter, h_filter, w_filter = W.shape
     n_x, d_x, h_x, w_x = X.shape
     
-    x_padded = np.pad(X, ((0,0),(0,0),(padding,padding),(padding,padding)), mode="constant")
+    if padding == "same":
+        x_padded, tuple_pad = pad_same(X, h_filter, w_filter, stride)
+    elif padding == "valid":
+        x_padded, tuple_pad = pad_valid(X, h_filter, w_filter, stride)
+    else:
+        x_padded, tuple_pad = X, (0,0,0,0)
     
-    tiles_w = (w_x + (2 * padding) - w_filter) % stride
-    tiles_h = (h_x + (2 * padding) - h_filter) % stride
     
-    if not tiles_w == 0:
-        x_padded = x_padded[:, :, :, :-tiles_w]
-    if not tiles_h == 0:
-        x_padded = x_padded[:, :, :-tiles_h, :]
 
     n_x, d_x, h_x, w_x = x_padded.shape
 
-    assert (w_x - w_filter) % stride == 0, 'width does not work'
-    assert (h_x - h_filter) % stride == 0, 'height does not work'
 
     out_h, out_w = int((h_x - h_filter) / stride + 1), int((w_x - w_filter) / stride + 1)
 
@@ -45,7 +94,7 @@ def conv_forward(X, W, b, stride=1, padding=1):
     out = out.transpose(3, 0, 1, 2)
 
         
-    cache = (X, x_padded.shape, tiles_h,tiles_w, W, b, stride, padding, X_col)
+    cache = (X, x_padded.shape, tuple_pad, W, b, stride, padding, X_col)
     
     return out, cache
 
@@ -53,7 +102,10 @@ def conv_forward(X, W, b, stride=1, padding=1):
     1 padding and 1 stride will keep the input size
 """
 def conv_backward(dout, cache):
-    X, x_padded_shape, tiles_h, tiles_w, W, b, stride, padding, X_col = cache
+    X, x_padded_shape, tuple_pad, W, b, stride, padding, X_col = cache
+    
+    w_pad_left,w_pad_right,h_pad_up,h_pad_down = tuple_pad
+    
     n_filter, d_filter, h_filter, w_filter = W.shape
     
     db = np.sum(dout, axis=(0, 2, 3))
@@ -67,7 +119,7 @@ def conv_backward(dout, cache):
     dX_col = W_reshape.T @ dout_reshaped
     dX = col2im_indices(dX_col, x_padded_shape, h_filter, w_filter, stride=stride)
     
-    dX = dX[:, :, padding:-(padding-tiles_h), padding:-(padding-tiles_w)]
+    dX = dX[:, :, h_pad_up:-h_pad_down, w_pad_left:-w_pad_right]
     
     return dX, dW, db
 
@@ -82,7 +134,7 @@ class Convolution_2D(Layer):
     def __init__(self,
                  name,
                  filter_shape: Tuple[int],
-                 padding: int = 1,
+                 padding = "same",
                  stride: int = 1) -> None:
         super().__init__(name)
         

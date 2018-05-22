@@ -23,13 +23,13 @@ targets = np.array([
                     ])
 
 net = NeuralNet([
-                 Dense(input_size=2, output_size=50),
-                 Sigmoid(),
-                 Dense(input_size=50, output_size=1)
+                 Dense(name="dense_1", input_size=2, output_size=50),
+                 Sigmoid(name="sigmoid_1"),
+                 Dense(name="dense_2",input_size=50, output_size=1)
                  ])
 
 train(net, inputs, targets, num_epochs=10000)
 
 for x, y in zip(inputs, targets):
-    predicted = net.forward(x)
+    predicted = net.forward(x, training=False)
     print(x, predicted, y)

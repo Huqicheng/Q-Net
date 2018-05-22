@@ -25,9 +25,9 @@ def res_block(name, n_channels, n_out_channels=None, stride=None):
                 name = "sequential_1",
                        
                 layers = [
-                    Convolution_2D(name="conv_1", filter_shape=(n_out_channels,n_channels,3,3),padding=1,stride=stride),
+                    Convolution_2D(name="conv_1", filter_shape=(n_out_channels,n_channels,3,3),padding="same",stride=stride),
                     SpatialBatchNormalization(name="sbn_1",input_channel=n_out_channels),
-                    Convolution_2D(name="conv_2", filter_shape=(n_out_channels,n_out_channels,3,3),padding=1,stride=1),
+                    Convolution_2D(name="conv_2", filter_shape=(n_out_channels,n_out_channels,3,3),padding="same",stride=1),
                     SpatialBatchNormalization(name="sbn_2",input_channel=n_out_channels)
                          ]
             )
@@ -40,7 +40,7 @@ def res_block(name, n_channels, n_out_channels=None, stride=None):
         shortcut = Sequential(
                               name = "sequential_3",
                               layers = [
-                                Convolution_2D(name="conv_1", filter_shape=(n_out_channels,n_channels,1,1),padding=0,stride=stride),
+                                Convolution_2D(name="conv_1", filter_shape=(n_out_channels,n_channels,1,1),padding="same",stride=stride),
                                 SpatialBatchNormalization(name="sbn_1",input_channel=n_out_channels)
                               ]
                     )
