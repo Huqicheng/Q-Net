@@ -34,6 +34,7 @@ net = Sequential(
                  name = "residual_net",
                  layers = [
                     res_block(name="res_block_1",n_channels=1,n_out_channels=5,stride=2),
+                    res_block(name="res_block_2",n_channels=5,n_out_channels=5,stride=1),
                     Flatten(name="flat_1"),
                     Dense(input_size=14*14*5, output_size=10, name="dense_1"),
                     BatchNormalization(name="bn_1",input_size=10),

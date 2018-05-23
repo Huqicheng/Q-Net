@@ -14,6 +14,13 @@ class Activation(Layer):
                  name,
                  f: F,
                  f_prime: F) -> None:
+        """
+            params:
+            
+            f: the activation function
+            
+            f_prime: the derivative of the activation function corresponding to input
+        """
         super().__init__(name)
         self.f = f
         self.f_prime = f_prime
@@ -24,6 +31,7 @@ class Activation(Layer):
         return self.f(inputs)
     
     '''
+        according to the Chain Rule,
         y = g(x) z = f(z)
         dy/dz = g'(x) * f'(z)
     '''

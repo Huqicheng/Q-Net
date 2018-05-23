@@ -38,15 +38,12 @@ net = NeuralNet([
     Dense(input_size=50, output_size=100,name="dense_2"),
     BatchNormalization(input_size=100,name="bn_2"),
     ReLU(name="relu_2"),
-    Dense(input_size=100, output_size=500,name="dense_3"),
-    BatchNormalization(input_size=500,name="bn_3"),
-    ReLU(name="relu_3"),
-    Dense(input_size=500, output_size=2,name="dense_4"),
+    Dense(input_size=100, output_size=2,name="dense_4"),
     BatchNormalization(input_size=2,name="bn_4"),
     Softmax(name="softmax_1")
 ])
 
-train(net, x_train, y_train, num_epochs=400,loss=CrossEntropy(),optimizer=Adam())
+train(net, x_train, y_train, num_epochs=1000,loss=CrossEntropy(),optimizer=Adam())
 
 y_test = np.argmax(y_test,axis=1)
 print(accurarcy(net.predict(x_test), y_test))

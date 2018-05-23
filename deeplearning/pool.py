@@ -4,6 +4,13 @@ from deeplearning.conv_utils import *
 from deeplearning.tensor import Tensor
 import numpy as np
 
+
+"""
+    Stanford CS231n
+    
+    http://cs231n.github.io/convolutional-networks/
+"""
+
 def _pool_forward(X, pool_fun, size=2, stride=2):
     n, d, h, w = X.shape
     h_out = (h - size) / stride + 1

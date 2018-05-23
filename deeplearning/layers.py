@@ -32,6 +32,18 @@ class Layer:
         for name, param in self.params.items():
             yield name, name ,param, self.grads[name]
 
+"""
+    next step:
+    
+    implement a container class extended from layer in order to decouple layers that contain several layers...
+    
+    as the base class of Sequential, Concatenation ...
+"""
+
+
+
+
+
 class Identity(Layer):
     """
         output = input
@@ -44,6 +56,7 @@ class Identity(Layer):
     
     def backward(self, grad: Tensor) -> Tensor:
         return grad
+
 
 class Dense(Layer):
 
@@ -238,6 +251,13 @@ class BatchNormalization(Layer):
                  name,
                  input_size: int,
                  decay: float = 0.9) -> None:
+        """
+            params:
+            
+            input_channel: number of channels of input data
+            
+            decay: momentum factor for running_mean and running variance calculation.
+        """
         super().__init__(name)
         self.params['gamma'] = np.ones((input_size,), dtype='float64')
         self.params['beta'] = np.zeros((input_size,), dtype='float64')
@@ -327,6 +347,7 @@ class SpatialBatchNormalization(BatchNormalization):
         """
             params:
                 input_channel: number of channels of input data
+                
                 decay: momentum factor for running_mean and running variance calculation.
         """
 

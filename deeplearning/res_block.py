@@ -12,12 +12,20 @@ from deeplearning.pool import Max_Pool_2D, Avg_Pool_2D
 
 
 """
-    The next step:
+    one-by-one convolution:
     
-    the implementation of padding is so stupid now. I'm gonna use "same" or "valid" instead.
+    http://iamaaditya.github.io/2016/03/one-by-one-convolution/
 """
 
 def res_block(name, n_channels, n_out_channels=None, stride=None):
+    """
+        params:
+            n_channels: input channels
+            
+            n_out_channels: expected output channels
+            
+            stride: the stride of convolution (when stride>=2, res_block can be used to do downsampling)
+    """
     n_out_channels = n_out_channels or n_channels
     stride = stride or 1
     blockname = name
