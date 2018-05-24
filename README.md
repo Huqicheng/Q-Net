@@ -17,10 +17,13 @@ A simplified deep learning framework.<br>
   * Softmax
   * ReLU
 * BatchNormalization
+  * SpatialBatchNormalization
 * Pool_2D
   * Avg_Pool
   * Max_Pool
 * Convolution_2D
+* Concatenation + Add
+* Residual Block
 
   
 
@@ -54,6 +57,33 @@ net = NeuralNet([
 ```
 train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 ```
+
+#### 4.2 CNN
+
+#### 4.1 The network structure
+```
+net = NeuralNet([
+                    Convolution_2D(name="conv_1", filter_shape=(10,1,1,1),padding=0,stride=1),
+                    Avg_Pool_2D(name="avg_pool_1", size=2, stride=2),
+                    SpatialBatchNormalization(name="sbn_1",input_channel=10),
+                    ReLU(name="relu_1"),
+                    Convolution_2D(name="conv_2", filter_shape=(20,10,3,3),padding=1,stride=1),
+                    Avg_Pool_2D(name="avg_pool_2", size=2, stride=2),
+                    SpatialBatchNormalization(name="sbn_2",input_channel=20),
+                    ReLU(name="relu_2"),
+                    Flatten(name="flat_1"),
+                    Dense(input_size=7*7*20, output_size=100, name="dense_1"),
+                    BatchNormalization(name="bn_1",input_size=100),
+                    ReLU(name="relu_3"),
+                    Dense(input_size=100, output_size=10, name="dense_2"),
+                    BatchNormalization(name="bn_2",input_size=10),
+                    Softmax(name="softmax_1")
+                 
+                 
+                ])
+```
+
+
 
 ## References
 * [Softmax Function](https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0)
