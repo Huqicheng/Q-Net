@@ -71,10 +71,22 @@ class Dense(Layer):
     def __init__(self,
                  name,
                  input_size: int,
-                 output_size: int) -> None:
+                 output_size: int,
+                 regularization = "none",
+                 reg_factor:float = 0.) -> None:
+        """
+            params:
+            
+            input_size: length of input vector
+            
+            output_size: number of neurons
+        """
         super().__init__(name)
         self.params["w"] = np.float64(np.random.randn(input_size,output_size))
         self.params["b"] = np.float64(np.random.randn(output_size))
+        self.reg = regularization
+        self.reg_factor = reg_factor
+                 
 
 
     def forward(self,inputs: Tensor, **kwargs) -> Tensor:
