@@ -80,7 +80,7 @@ net = NeuralNet([
                     Softmax(name="softmax_1")
                  
                  
-                ])
+])
 ```
 
 
