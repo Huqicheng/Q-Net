@@ -63,11 +63,11 @@ train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 #### 4.2.1 The network structure
 ```
 net = NeuralNet([
-           Convolution_2D(name="conv_1", filter_shape=(10,1,1,1),padding=0,stride=1),
+           Convolution_2D(name="conv_1", filter_shape=(10,1,3,3),padding="same",stride=1),
            Avg_Pool_2D(name="avg_pool_1", size=2, stride=2),
            SpatialBatchNormalization(name="sbn_1",input_channel=10),
            ReLU(name="relu_1"),
-           Convolution_2D(name="conv_2", filter_shape=(20,10,3,3),padding=1,stride=1),
+           Convolution_2D(name="conv_2", filter_shape=(20,10,3,3),padding="same",stride=1),
            Avg_Pool_2D(name="avg_pool_2", size=2, stride=2),
            SpatialBatchNormalization(name="sbn_2",input_channel=20),
            ReLU(name="relu_2"),
