@@ -24,7 +24,7 @@ A simplified deep learning framework.<br>
 * Convolution_2D
 * Concatenation + Add
 * Residual Block
-
+* RNN (as a layer)
   
 
 ## 2. Loss Functions
@@ -60,7 +60,7 @@ train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 
 #### 4.2 CNN
 
-#### 4.1 The network structure
+#### 4.2.1 The network structure
 ```
 net = NeuralNet([
            Convolution_2D(name="conv_1", filter_shape=(10,1,1,1),padding=0,stride=1),
@@ -81,7 +81,56 @@ net = NeuralNet([
 ])
 ```
 
+#### 4.3 RNN
 
+#### 4.3.1 Data preparation
+
+```
+    # training dataset generation
+    int2binary = {}
+    binary_dim = 8
+
+    largest_number = pow(2,binary_dim)
+    binary = np.unpackbits(
+                 np.array([range(largest_number)],dtype=np.uint8).T,axis=1
+             )
+    for i in range(largest_number):
+        int2binary[i] = binary[i]
+
+    # prepare for training data
+    # to fit a function of a+b = c
+    batch_size = 32
+
+    X = np.zeros((batch_size,2,binary_dim))
+    y = np.zeros((batch_size,binary_dim))
+    for i in range(batch_size):
+        a_int = np.random.randint(largest_number/2)
+        a = int2binary[a_int] # binary encoding
+        b_int = np.random.randint(largest_number/2)
+        b = int2binary[b_int]
+        # answer
+        c_int = a_int + b_int
+        c = int2binary[c_int]
+
+        X[i,0,:] = a
+        X[i,1,:] = b
+        y[i,:] = c
+```
+
+#### 4.3.2 The network structure
+```
+     net = Sequential(
+            name = "net",
+            layers = [
+                RNN(name="rnn_1", D=8, H=8),
+                Sigmoid(name="sigmoid_1"),
+                LastTimeStep(name="last_1"),
+                Dense(name="dense_1", input_size=8, output_size=8),
+                Sigmoid(name="sigmoid_5")
+            ]
+
+      )              
+```
 
 ## References
 * [Softmax Function](https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0)
@@ -93,5 +142,6 @@ net = NeuralNet([
 * [Implementation of Forward and Backward of BN](https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html)
 * [Difference between Training and Testing of BN Layer](https://www.quora.com/How-does-batch-normalization-behave-differently-at-training-time-and-test-time)
 * [Stanford CS231n](http://cs231n.github.io/convolutional-networks/)
+* [Recurrent Neural Network](http://manutdzou.github.io/2016/07/11/RNN-backpropagation.html)
 
 
