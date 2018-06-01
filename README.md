@@ -58,7 +58,7 @@ net = NeuralNet([
 train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 ```
 
-#### 4.2 CNN
+#### 4.2 Convolutional Neural Network
 
 #### 4.2.1 The network structure
 ```
@@ -81,7 +81,7 @@ net = NeuralNet([
 ])
 ```
 
-#### 4.3 RNN
+#### 4.3 Recurrent Neural Network
 
 #### 4.3.1 Data preparation
 
