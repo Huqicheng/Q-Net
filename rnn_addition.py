@@ -49,16 +49,16 @@ from deeplearning.optim import SGD, Adam
 net = Sequential(
             name = "net",
             layers = [
-                RNN(name="rnn_1", D=8, H=8),
+                RNN(name="rnn_1", D=8, H=16),
                 Sigmoid(name="sigmoid_1"),
                 LastTimeStep(name="last_1"),
-                Dense(name="dense_1", input_size=8, output_size=8),
+                Dense(name="dense_1", input_size=16, output_size=8),
                 Sigmoid(name="sigmoid_5")
             ]
 
       )
 
-train(net, X, y, num_epochs=5000,loss=MSE(),optimizer=Adam())
+train(net, X, y, num_epochs=1000,loss=MSE(),optimizer=Adam())
 
 
 

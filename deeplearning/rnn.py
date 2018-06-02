@@ -93,11 +93,13 @@ class RNN(Layer):
 
 
     def forward(self, inputs, **kwargs):
-        N,T,H = inputs.shape
+        N,T,_ = inputs.shape
         self.N = N
         self.T = T
         
-        # initiate some caches
+        H = self.H
+        
+        # initialize some caches
         h = np.zeros((N,T,H))
         h0 = np.zeros((N,H))
         self.time_cache = [None for i in range(T)]
@@ -115,14 +117,14 @@ class RNN(Layer):
         return h
 
     def backward(self, grad):
-        D,T,H = self.D, self.T, self.H
+        N,D,T,H = self.N,self.D, self.T, self.H
         
-        # initiation
+        # initialization
         dWxh = np.zeros((D, H))
         dWhh = np.zeros((H, H))
         dbh = np.zeros((H))
-        dx = np.zeros((self.N, T, D))
-        dprev_h_t = np.zeros((self.N,H))
+        dx = np.zeros((N, T, D))
+        dprev_h_t = np.zeros((N,H))
         
         # back-prop with respect to the time step
         for t in reversed(range(T)):
