@@ -25,6 +25,7 @@ A simplified deep learning framework.<br>
 * Concatenation + Add
 * Residual Block
 * RNN (as a layer)
+  * LSTM
   
 
 ## 2. Loss Functions
