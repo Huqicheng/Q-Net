@@ -226,10 +226,10 @@ class LSTM_Cell(RNN_Cell):
         dg = dc * i
 
         da = np.zeros_like(a)
-        da[:, :H] = sigmoid_derivative(a[:,:H]) * di
-        da[:, H:2*H] = sigmoid_derivative(a[:,H:2*H]) * df
-        da[:, 2 * H:3 * H] = sigmoid_derivative(a[:,2*H:-H]) * do
-        da[:, 3 * H:] = tanh_derivative(a[:,-H:]) * dg
+        da[:, : H] = sigmoid_derivative(a[:,:H]) * di
+        da[:, H : 2*H] = sigmoid_derivative(a[:,H:2*H]) * df
+        da[:, 2*H : 3*H] = sigmoid_derivative(a[:,2*H:-H]) * do
+        da[:, 3*H :] = tanh_derivative(a[:,-H:]) * dg
 
         self.grads["Wxh"] = inputs.T @ da
         self.grads["Whh"] = prev_h.T @ da
@@ -292,10 +292,13 @@ class LSTM(Layer):
     def backward(self, grad):
         N,D,T,H = self.N,self.D, self.T, self.H
         
+        # required for initialization of dWxh,dWhh and dbh
+        w_size = self.rnn_cell.params["Wxh"].shape[1]
+        
         # initialization
-        dWxh = np.zeros((D, 4*H))
-        dWhh = np.zeros((H, 4*H))
-        dbh = np.zeros((4*H))
+        dWxh = np.zeros((D, w_size))
+        dWhh = np.zeros((H, w_size))
+        dbh = np.zeros((w_size))
         dx = np.zeros((N, T, D))
         dprev_h_t = np.zeros((N,H))
         dprev_c_t = np.zeros((N,H))
@@ -328,8 +331,89 @@ class LSTM(Layer):
 
 
 
+class GRU_Cell(RNN_Cell):
+    def __init__(self, name, D, H):
+        super().__init__(name, D, H)
+        
+        # Wi Wf Wo Wg => the shape of weights should be 4*H
+        self.params["Wxh"] = np.random.randn(D, 3*H) / np.sqrt(D / 2.)
+        self.params["Whh"] = np.random.randn(H, 3*H) / np.sqrt(H / 2.)
+        self.params["bh"] = np.zeros((1, 3*H))
+    
+    
+    def forward(self, inputs, **kwargs):
+        prev_h, prev_c = kwargs["cache"]
+        self.N = inputs.shape[0]
+        
+        Wxh, Whh = self.params['Wxh'], self.params['Whh']
+        bh = self.params['bh']
+        
+        H = self.H
+        
+        # update gate
+        a_z = inputs @ Wxh[:,:H] + prev_h @ Whh[:,:H]
+        z = sigmoid(a_z)
+        # reset gate
+        a_r = inputs @ Wxh[:,H:2*H] + prev_h @ Whh[:,H:2*H]
+        r = sigmoid(a_r)
+        # state
+        a_c = inputs @ Wxh[:,-H:] + (r * prev_h) @ Whh[:,-H:]
+        c = tanh(a_c)
+        # output
+        h = (1 - z) * c + (z * prev_c)
+        
+        cache = (a_z, a_r, a_c, z, r, c, h, inputs, prev_h, prev_c)
+        
+        return h, c, cache
+    
+    """
+        TODO: incorrect
+    """
+    def backward(self, grad, **kwargs):
+        Wxh, Whh = self.params['Wxh'], self.params['Whh']
+        bh = self.params['bh']
+        
+        H = self.H
+        
+        a_z, a_r, a_c, z, r, c, h, inputs, prev_h, prev_c = kwargs["cache"]
+        
+        dnext_h, dnext_c = grad
+        
+        # actually, the output of the cell is tuple(h,c) and c will influence both of them.
+        # according to chain rule, add two derivative path together
+        dc = dnext_c + dnext_h * (1 - z)
+        dz = dnext_h * (prev_c)
+        da_c = dc * tanh_derivative(a_c)
+        dr = (r * prev_h) * r * da_c
+        
+        
+        da = np.zeros((self.N, 3*self.H))
+        da[:,0 : H] = sigmoid_derivative(a_z) * dz
+        da[:, H : 2*H] = sigmoid_derivative(a_r) * dr
+        da[:, 2*H : 3*H] = tanh_derivative(a_c) * dc
+        
+        
+        self.grads["Wxh"] = inputs.T @ da
+        self.grads["Whh"] = (r*prev_h).T @ da
+        self.grads["bh"] = np.sum(da, axis=0)
+        dh = da @ Whh.T
+        dx = da @ Wxh.T
+        
+        return dx, dh, dc
 
 
 
-
-
+class GRU(LSTM):
+    def __init__(self, name, D, H):
+        """
+            Contains one rnn cell and get output by "forwarding" the cell recurrently.
+            
+            Params:
+            ---------------
+            D: input size (size of the last dimension of the input matrix)
+            
+            H: size of hidden layer
+            """
+        super().__init__(name,D,H)
+        
+        self.rnn_cell = GRU_Cell(name,D,H)
