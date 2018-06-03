@@ -181,13 +181,25 @@ class LSTM_Cell(RNN_Cell):
         a = inputs @ Wxh + prev_h @ Whh + bh
         
         # activate the output respectively
+        
+        # input layer gate, decides which value to be updated
         i = sigmoid(a[:,:H])
+        
+        # forget gate layer: indicates if a value in Ct-1 should be forgotten
+        # 1 represents “completely keep this”
+        # 0 represents “completely get rid of this.”
         f = sigmoid(a[:,H:2*H])
+        
+        # output gate layer: what parts of the cell state we’re going to output
         o = sigmoid(a[:,2*H:-H])
+        
+        # new candidate values for cell state
         g = tanh(a[:,-H:])
         
-        # results
+        # the new cell state
         c = f*prev_c + i*g
+        
+        # get output according to the cell state
         h = o * tanh(c)
         
         cache = (i, f, o, g, h, c, a, inputs, prev_h, prev_c)
