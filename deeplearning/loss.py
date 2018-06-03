@@ -43,4 +43,4 @@ class CrossEntropy(Loss):
             https://www.dropbox.com/s/rxrtz3auu845fuy/Softmax.pdf?dl=0
             https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy
         """
-        return (predicted-actual)/(predicted * (1 - predicted))
+        return (predicted-actual)/(predicted * (1 - predicted) + np.finfo(float).eps)

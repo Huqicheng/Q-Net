@@ -29,21 +29,32 @@ from deeplearning.layers import Dense,Dropout,BatchNormalization
 from deeplearning.loss import MSE, CrossEntropy
 from deeplearning.optim import Momentum_SGD,SGD,AdaGrad,RMSProp,Adam
 from deeplearning.evaluation import accurarcy
+from deeplearning.reg import *
 
 
 net = NeuralNet([
-    Dense(input_size=12, output_size=50,name="dense_1"),
-    BatchNormalization(input_size=50,name="bn_1"),
-    ReLU(name="relu_1"),
-    Dense(input_size=50, output_size=100,name="dense_2"),
-    BatchNormalization(input_size=100,name="bn_2"),
-    ReLU(name="relu_2"),
-    Dense(input_size=100, output_size=2,name="dense_4"),
-    BatchNormalization(input_size=2,name="bn_4"),
-    Softmax(name="softmax_1")
+                 Dense(input_size=12, output_size=50,name="dense_1"),
+                 BatchNormalization(input_size=50,name="bn_1"),
+                 ReLU(name="relu_1"),
+                 Dense(input_size=50, output_size=100,name="dense_2"),
+                 BatchNormalization(input_size=100,name="bn_2"),
+                 ReLU(name="relu_2"),
+                 Dense(input_size=100, output_size=2,name="dense_4"),
+                 BatchNormalization(input_size=2,name="bn_4"),
+                 Softmax(name="softmax_1")
 ])
 
-train(net, x_train, y_train, num_epochs=1000,loss=CrossEntropy(),optimizer=Adam())
+#net = NeuralNet([
+#    Dense(input_size=12, output_size=50,name="dense_1",regularizer=L2_Regularization(lamda=0.003)),
+#    ReLU(name="relu_1"),
+#    Dense(input_size=50, output_size=100,name="dense_2",regularizer=L2_Regularization(lamda=0.003)),
+#    ReLU(name="relu_2"),
+#    Dense(input_size=100, output_size=2,name="dense_3",regularizer=L2_Regularization(lamda=0.003)),
+#    ReLU(name="relu_3"),
+#    Softmax(name="softmax_1")
+#])
+
+train(net, x_train, y_train, num_epochs=1000,loss=CrossEntropy(),optimizer=SGD())
 
 y_test = np.argmax(y_test,axis=1)
 print(accurarcy(net.predict(x_test), y_test))

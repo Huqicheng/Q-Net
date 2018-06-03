@@ -1,5 +1,6 @@
 from deeplearning.tensor import Tensor
 from typing import Sequence, Tuple
+from deeplearning.reg import *
 
 """
     tricks of DL
@@ -72,20 +73,21 @@ class Dense(Layer):
                  name,
                  input_size: int,
                  output_size: int,
-                 regularization = "none",
-                 reg_factor:float = 0.) -> None:
+                 regularizer: Regularization = None) -> None:
         """
             params:
             
             input_size: length of input vector
             
             output_size: number of neurons
+            
+            regularizer: Regularization, default as None, (for example, L2_Regularization(lamda=0.03) etc.)
         """
         super().__init__(name)
         self.params["w"] = np.float64(np.random.randn(input_size,output_size))
         self.params["b"] = np.float64(np.random.randn(output_size))
-        self.reg = regularization
-        self.reg_factor = reg_factor
+        self.reg = regularizer
+        
                  
 
 
@@ -95,13 +97,14 @@ class Dense(Layer):
     
     '''
         d net / d w
-        d net / d b which is not a nueron in the nn, so doesn't backprop it
         
         d (f(wx+b)) / d x = f'(wx+b)*(d (x@w+b) / d x) = grad * wT
     '''
     def backward(self,grad: Tensor) -> Tensor:
         self.grads["b"] = np.sum(grad,axis=0)
         self.grads["w"] = self.inputs.T @ grad
+        if self.reg is not None:
+            self.grads["w"] += self.reg.regularize(self.params["w"])
         return grad @ self.params["w"].T
 
 

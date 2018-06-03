@@ -2,7 +2,7 @@ import numpy as np
 
 from deeplearning.tensor import Tensor
 from deeplearning.layers import Layer
-from deeplearning.func import tanh,sigmoid,sigmoid_derivative
+from deeplearning.func import tanh,tanh_derivative,sigmoid,sigmoid_derivative
 
 """
     https://iamtrask.github.io/2015/11/15/anyone-can-code-lstm/
@@ -128,8 +128,7 @@ class RNN(Layer):
         
         # back-prop with respect to the time step
         for t in reversed(range(T)):
-            cache = (self.time_cache[t][0], self.time_cache[t][1], self.time_cache[t][2])
-            dx[:,t,:], dprev_h_t = self.rnn_cell.backward(grad[:,t,:] + dprev_h_t, cache=cache)
+            dx[:,t,:], dprev_h_t = self.rnn_cell.backward(grad[:,t,:] + dprev_h_t, cache=self.time_cache[t])
             dWxh += self.rnn_cell.grads["Wxh"]
             dWhh += self.rnn_cell.grads["Whh"]
             dbh += self.rnn_cell.grads["bh"]
@@ -153,12 +152,160 @@ class RNN(Layer):
 
 
 
+"""
+    Preparation for LSTM:
+    
+    http://colah.github.io/posts/2015-08-Understanding-LSTMs/
+"""
+
+
+class LSTM_Cell(RNN_Cell):
+    def __init__(self, name, D, H):
+        super().__init__(name, D, H)
+    
+        self.params["Wxh"] = np.random.randn(D, 4*H) / np.sqrt(D / 2.)
+        self.params["Whh"] = np.random.randn(H, 4*H) / np.sqrt(H / 2.)
+        self.params["bh"] = np.zeros((1, 4*H))
+    
+    
+    def forward(self, inputs, **kwargs):
+        prev_h, prev_c = kwargs["cache"]
+        
+        Wxh, Whh = self.params['Wxh'], self.params['Whh']
+        bh = self.params['bh']
+        
+        H = self.H
+        
+        a = inputs @ Wxh + prev_h @ Whh + bh
+        
+        i = sigmoid(a[:,:H])
+        f = sigmoid(a[:,H:2*H])
+        o = sigmoid(a[:,2*H:-H])
+        g = tanh(a[:,-H:])
+        
+        # results
+        c = f*prev_c + i*g
+        h = o * tanh(c)
+        
+        cache = (i, f, o, g, h, c, a, inputs, prev_h, prev_c)
+        
+        return h, c, cache
+    
+    
+    def backward(self, grad, **kwargs):
+        Wxh, Whh = self.params['Wxh'], self.params['Whh']
+        bh = self.params['bh']
+        
+        H = self.H
+        
+        i, f, o, g, h, c, a, inputs, prev_h, prev_c = kwargs["cache"]
+        
+        dnext_h, dnext_c = grad
+        
+        dc = (dnext_c + dnext_h * o * tanh_derivative(c)) * f
+        
+        di = (dnext_c + dnext_h * o * tanh_derivative(c)) * g
+        df = (dnext_c + dnext_h * o * tanh_derivative(c)) * prev_c
+        do = dnext_h * tanh_derivative(c)
+        dg = (dnext_c + dnext_h * o * tanh_derivative(c)) * i
+
+        da = np.zeros_like(a)
+        da[:, :H] = sigmoid_derivative(a[:,:H]) * di
+        da[:, H:2*H] = sigmoid_derivative(a[:,H:2*H]) * df
+        da[:, 2 * H:3 * H] = sigmoid_derivative(a[:,2*H:-H]) * do
+        da[:, 3 * H:] = tanh_derivative(a[:,-H:]) * dg
+
+        self.grads["Wxh"] = inputs.T @ da
+        self.grads["Whh"] = prev_h.T @ da
+        self.grads["bh"] = np.sum(da, axis=0)
+        dh = da @ Whh.T
+        dx = da @ Wxh.T
+
+        return dx, dh, dc
 
 
 
 
+class LSTM(Layer):
+    def __init__(self, name, D, H):
+        """
+            Contains one rnn cell and get output by "forwarding" the cell recurrently.
+            
+            Params:
+            ---------------
+            D: input size (size of the last dimension of the input matrix)
+            
+            H: size of hidden layer
+            """
+        super().__init__(name)
+        
+        self.D = D
+        self.H = H
+        
+        self.rnn_cell = LSTM_Cell(name,D,H)
+    
+    
+    def forward(self, inputs, **kwargs):
+        N,T,D = inputs.shape
+        self.N = N
+        self.T = T
+        
+        H = self.H
+        
+        # initialize some caches
+        h = np.zeros((N,T,H))
+        h0 = np.zeros((N,H))
+        c0 = np.zeros_like(h0)
+        self.time_cache = [None for i in range(T)]
+        
+        prev_h = h0
+        prev_c = c0
+        
+        # iterate from the first cell to the last one (actually, the same one, because they share weights)
+        for t in range(T):
+            next_h, next_c, self.time_cache[t] = self.rnn_cell.forward(inputs[:,t,:].squeeze(),cache=(prev_h, prev_c))
+            h[:,t,:] = next_h
+            prev_h = next_h
+            prev_c = next_c
+        
+        
+        # the output seems like (batch_size, time_steps, size_of_hidden_layer)
+        # for some classification problems, just using the last time_step, aka, h[:,-1,:]
+        return h
+    
+    def backward(self, grad):
+        N,D,T,H = self.N,self.D, self.T, self.H
+        
+        # initialization
+        dWxh = np.zeros((D, 4*H))
+        dWhh = np.zeros((H, 4*H))
+        dbh = np.zeros((4*H))
+        dx = np.zeros((N, T, D))
+        dprev_h_t = np.zeros((N,H))
+        dprev_c_t = np.zeros((N,H))
+        
+        # back-prop with respect to the time step
+        for t in reversed(range(T)):
+            dx[:,t,:], dprev_h_t, dprev_c_t = self.rnn_cell.backward((grad[:,t,:] + dprev_h_t, dprev_c_t), cache=self.time_cache[t])
+            dWxh += self.rnn_cell.grads["Wxh"]
+            dWhh += self.rnn_cell.grads["Whh"]
+            dbh += self.rnn_cell.grads["bh"]
+        
+        dh0 = dprev_h_t
+        
+        self.rnn_cell.grads["Wxh"] = dWxh
+        self.rnn_cell.grads["Whh"] = dWhh
+        self.rnn_cell.grads["bh"] = dbh
+        
+        return dx
 
 
+    def get_params_grads(self):
+        """
+            return  (name in the map of optimizer, real param name, param)
+        """
+        for map_name,name, param, grad in self.rnn_cell.get_params_grads():
+            yield self.name+'_'+map_name, name, param, grad
 
 
 
