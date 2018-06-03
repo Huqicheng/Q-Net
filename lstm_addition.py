@@ -58,7 +58,7 @@ net = Sequential(
 
       )
 
-train(net, X, y, num_epochs=1000,loss=MSE(),optimizer=Adam())
+train(net, X, y, num_epochs=3000,loss=MSE(),optimizer=Adam())
 
 
 

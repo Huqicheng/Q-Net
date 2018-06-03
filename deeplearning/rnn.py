@@ -163,6 +163,7 @@ class LSTM_Cell(RNN_Cell):
     def __init__(self, name, D, H):
         super().__init__(name, D, H)
     
+        # Wi Wf Wo Wg => the shape of weights should be 4*H
         self.params["Wxh"] = np.random.randn(D, 4*H) / np.sqrt(D / 2.)
         self.params["Whh"] = np.random.randn(H, 4*H) / np.sqrt(H / 2.)
         self.params["bh"] = np.zeros((1, 4*H))
@@ -176,8 +177,10 @@ class LSTM_Cell(RNN_Cell):
         
         H = self.H
         
+        # compute the input of i,f,o,g in one formula
         a = inputs @ Wxh + prev_h @ Whh + bh
         
+        # activate the output respectively
         i = sigmoid(a[:,:H])
         f = sigmoid(a[:,H:2*H])
         o = sigmoid(a[:,2*H:-H])
@@ -201,13 +204,14 @@ class LSTM_Cell(RNN_Cell):
         i, f, o, g, h, c, a, inputs, prev_h, prev_c = kwargs["cache"]
         
         dnext_h, dnext_c = grad
-        
-        dc = (dnext_c + dnext_h * o * tanh_derivative(c)) * f
-        
-        di = (dnext_c + dnext_h * o * tanh_derivative(c)) * g
-        df = (dnext_c + dnext_h * o * tanh_derivative(c)) * prev_c
+    
+        # actually, the output of the cell is tuple(h,c) and c will influence both of them.
+        # according to chain rule, add two derivative path together
+        dc = dnext_c + dnext_h * o * tanh_derivative(c)
+        di = dc * g
+        df = dc * prev_c
         do = dnext_h * tanh_derivative(c)
-        dg = (dnext_c + dnext_h * o * tanh_derivative(c)) * i
+        dg = dc * i
 
         da = np.zeros_like(a)
         da[:, :H] = sigmoid_derivative(a[:,:H]) * di
@@ -236,7 +240,7 @@ class LSTM(Layer):
             D: input size (size of the last dimension of the input matrix)
             
             H: size of hidden layer
-            """
+        """
         super().__init__(name)
         
         self.D = D
@@ -286,7 +290,7 @@ class LSTM(Layer):
         
         # back-prop with respect to the time step
         for t in reversed(range(T)):
-            dx[:,t,:], dprev_h_t, dprev_c_t = self.rnn_cell.backward((grad[:,t,:] + dprev_h_t, dprev_c_t), cache=self.time_cache[t])
+            dx[:,t,:], dprev_h_t, dprev_c_t = self.rnn_cell.backward(grad=(grad[:,t,:] + dprev_h_t, dprev_c_t), cache=self.time_cache[t])
             dWxh += self.rnn_cell.grads["Wxh"]
             dWhh += self.rnn_cell.grads["Whh"]
             dbh += self.rnn_cell.grads["bh"]
