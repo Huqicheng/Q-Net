@@ -360,15 +360,13 @@ class GRU_Cell(RNN_Cell):
         a_c = inputs @ Wxh[:,-H:] + (r * prev_h) @ Whh[:,-H:]
         c = tanh(a_c)
         # output
-        h = (1 - z) * c + (z * prev_c)
+        h = (1 - z) * prev_c + (z * c)
         
         cache = (a_z, a_r, a_c, z, r, c, h, inputs, prev_h, prev_c)
         
         return h, c, cache
     
-    """
-        TODO: incorrect
-    """
+    
     def backward(self, grad, **kwargs):
         Wxh, Whh = self.params['Wxh'], self.params['Whh']
         bh = self.params['bh']
@@ -381,22 +379,24 @@ class GRU_Cell(RNN_Cell):
         
         # actually, the output of the cell is tuple(h,c) and c will influence both of them.
         # according to chain rule, add two derivative path together
-        dc = dnext_c + dnext_h * (1 - z)
-        dz = dnext_h * (prev_c)
+        dc = dnext_c + dnext_h * z
+        dz = dnext_h * (-1*prev_c) + c
         da_c = dc * tanh_derivative(a_c)
-        dr = (r * prev_h) * r * da_c
+        dr = da_c @ Whh[:,-H:].T * prev_h
         
         
         da = np.zeros((self.N, 3*self.H))
-        da[:,0 : H] = sigmoid_derivative(a_z) * dz
+        da[:,0:H] = sigmoid_derivative(a_z) * dz
         da[:, H : 2*H] = sigmoid_derivative(a_r) * dr
-        da[:, 2*H : 3*H] = tanh_derivative(a_c) * dc
+        da[:, 2*H : 3*H] = da_c
         
         
         self.grads["Wxh"] = inputs.T @ da
-        self.grads["Whh"] = (r*prev_h).T @ da
+        self.grads["Whh"] = np.zeros_like(self.params["Whh"])
+        self.grads["Whh"][:,0:2*H] = prev_h.T @ da[:,0:2*H]
+        self.grads["Whh"][:,-H:] = (prev_h*r).T @ da[:,-H:]
         self.grads["bh"] = np.sum(da, axis=0)
-        dh = da @ Whh.T
+        dh = da_c @ Whh[:,-H:].T * r + da[:,0:2*H] @ Whh[:,0:2*H].T
         dx = da @ Wxh.T
         
         return dx, dh, dc

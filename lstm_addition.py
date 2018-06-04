@@ -50,9 +50,7 @@ net = Sequential(
             name = "net",
             layers = [
                 GRU(name="rnn_1", D=8, H=16),
-                Sigmoid(name="sigmoid_1"),
-                LSTM(name="rnn_2", D=16, H=16),
-                Sigmoid(name="sigmoid_2"),
+                ReLU(name="sigmoid_1"),
                 LastTimeStep(name="last_1"),
                 Dense(name="dense_1", input_size=16, output_size=8),
                 Sigmoid(name="sigmoid_5")
@@ -60,7 +58,7 @@ net = Sequential(
 
       )
 
-train(net, X, y, num_epochs=1500,loss=MSE(),optimizer=Adam())
+train(net, X, y, num_epochs=1000,loss=MSE(),optimizer=Adam())
 
 
 
