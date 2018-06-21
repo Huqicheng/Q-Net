@@ -44,7 +44,7 @@ A simplified deep learning framework.<br>
 #### 4.1 Fully Connected Network
 The source code of training a Neural Network to fit the xor function is in xor.py.
 #### 4.1.1 Building a Neural Network with one hidden layer and one softmax layer.
-```
+```python
 net = NeuralNet([
     Dense(input_size=2, output_size=20, name="dense_1"),
     BatchNormalization(name="bn_1",input_size=20),
@@ -55,14 +55,14 @@ net = NeuralNet([
 ])
 ```
 #### 4.1.2 Training the Neural Network
-```
+```python
 train(net, inputs, targets, num_epochs=500,loss=CrossEntropy())
 ```
 
 #### 4.2 Convolutional Neural Network
 
 #### 4.2.1 The network structure
-```
+```python
 net = NeuralNet([
            Convolution_2D(name="conv_1", filter_shape=(10,1,3,3),padding="same",stride=1),
            Avg_Pool_2D(name="avg_pool_1", size=2, stride=2),
@@ -86,7 +86,7 @@ net = NeuralNet([
 
 #### 4.3.1 Data preparation
 
-```
+```python
     # training dataset generation
     int2binary = {}
     binary_dim = 8
@@ -119,7 +119,7 @@ net = NeuralNet([
 ```
 
 #### 4.3.2 The network structure
-```
+```python
      net = Sequential(
             name = "net",
             layers = [
@@ -136,7 +136,7 @@ net = NeuralNet([
 
 #### 4.4 Residual Block
 
-```
+```python
     def res_block(name, n_channels, n_out_channels=None, stride=None):
  
         n_out_channels = n_out_channels or n_channels
